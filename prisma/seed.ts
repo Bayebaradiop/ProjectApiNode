@@ -62,21 +62,21 @@ async function main() {
     // 3. Créer les niveaux de compétence
     console.log('📊 Création des niveaux de compétence...');
     const niveau1 = await prisma.niveau.upsert({
-      where: { nom: 'Niveau 1 - Débutant' },
+      where: { nom: 'N1' },
       update: {},
-      create: { nom: 'Niveau 1 - Débutant' },
+      create: { nom: 'N1' },
     });
 
     const niveau2 = await prisma.niveau.upsert({
-      where: { nom: 'Niveau 2 - Intermédiaire' },
+      where: { nom: 'N2' },
       update: {},
-      create: { nom: 'Niveau 2 - Intermédiaire' },
+      create: { nom: 'N2' },
     });
 
     const niveau3 = await prisma.niveau.upsert({
-      where: { nom: 'Niveau 3 - Avancé' },
+      where: { nom: 'N3' },
       update: {},
-      create: { nom: 'Niveau 3 - Avancé' },
+      create: { nom: 'N3' },
     });
 
     // 4. Créer les compétences
