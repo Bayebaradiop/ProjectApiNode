@@ -1,23 +1,45 @@
-import express, { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import competenceRoutes from './routes/competence.routes';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import userRoutes from './routes/user.routes';
 
 const app = express();
-const prisma = new PrismaClient();
 
-// Middlewares de base
+// Middleware
+app.use(helmet());
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/competences', competenceRoutes);
+app.use('/api/users', userRoutes);
 
-// Route de test
-app.get('/test', (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: 'API ECSA opérationnelle',
-    timestamp: new Date().toISOString()
+// Health check route
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    statut: "success",
+    message: "API is running",
+    timestamp: new Date().toISOString(),
   });
 });
+
+// 404 handler - commented out for testing
+// app.use('*', (req, res) => {
+//   res.status(404).json({
+//     statut: "error",
+//     message: "Route not found",
+//     data: null,
+//   });
+// });
+
+// Error handler - commented out for testing
+// app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+//   console.error('Error:', err);
+//   res.status(500).json({
+//     statut: "error",
+//     message: "Internal server error",
+//     data: null,
+//   });
+// });
 
 export default app;
