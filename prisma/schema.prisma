@@ -27,7 +27,7 @@ model User {
   profileId      Int
   profilSortieId Int?
   referentielId  Int?
-  
+
   profile        Profile       @relation(fields: [profileId], references: [id])
   profilSortie   ProfilSortie? @relation(fields: [profilSortieId], references: [id])
   referentiel    Referentiel?  @relation(fields: [referentielId], references: [id])
