@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import userRoutes from './routes/user.routes';
+import profilSortieRoutes from './routes/profilSortie.routes';
+import promoRoutes from './routes/ promo.routes';
 
 const app = express();
 
@@ -12,6 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/profils-sortie', profilSortieRoutes);
+app.use('/api/promos', promoRoutes);
 
 
 app.get('/api/health', (req, res) => {
