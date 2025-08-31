@@ -1,15 +1,39 @@
+
 import { z } from 'zod';
 
-// Validateur pour Tag
-export const tagSchema = z.object({
-  nom: z.string()
-    .min(1, 'Le nom du tag est requis')
-    .max(50, 'Le nom du tag ne peut pas dépasser 50 caractères')
-    .regex(/^[a-zA-ZÀ-ÿ\s\-]+$/, 'Le nom du tag ne peut contenir que des lettres, espaces et tirets')
+export const createTagSchema = z.object({
+  body: z.object({
+    nom: z.string()
+      .min(1, 'Le nom du tag est requis')
+      .max(50, 'Le nom du tag ne peut pas dépasser 50 caractères')
+      .regex(/^[a-zA-ZÀ-ÿ\s\-]+$/, 'Le nom du tag ne peut contenir que des lettres, espaces et tirets'),
+  }),
 });
 
-export const tagUpdateSchema = tagSchema.partial();
+export const updateTagSchema = z.object({
+  params: z.object({
+    id: z.string()
+      .regex(/^\d+$/, 'L\'ID doit être un nombre')
+      .transform(val => parseInt(val)),
+  }),
+  body: z.object({
+    nom: z.string()
+      .min(1, 'Le nom du tag est requis')
+      .max(50, 'Le nom du tag ne peut pas dépasser 50 caractères')
+      .regex(/^[a-zA-ZÀ-ÿ\s\-]+$/, 'Le nom du tag ne peut contenir que des lettres, espaces et tirets')
+      .optional(),
+  }),
+});
 
-// Type pour TypeScript
-export type TagInput = z.infer<typeof tagSchema>;
-export type TagUpdateInput = z.infer<typeof tagUpdateSchema>;
+export const tagIdSchema = z.object({
+  params: z.object({
+    id: z.string()
+      .regex(/^\d+$/, 'L\'ID doit être un nombre')
+      .transform(val => parseInt(val)),
+  }),
+});
+
+export type CreateTagInput = z.infer<typeof createTagSchema>["body"];
+export type UpdateTagInput = z.infer<typeof updateTagSchema>["body"];
+export type TagIdParams = z.infer<typeof tagIdSchema>["params"];
+
