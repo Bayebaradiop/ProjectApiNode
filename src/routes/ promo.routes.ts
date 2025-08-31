@@ -3,7 +3,7 @@ import {
   getFormateursByPromo,
   addFormateurToPromo,
   removeFormateurFromPromo,
-} from '../controllers/ promo.controller';
+} from '../controllers/promo.formateur.controller';
 
 const router = Router();
 
