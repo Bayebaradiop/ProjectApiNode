@@ -4,21 +4,6 @@ import { competenceSchema, competenceUpdateSchema, CompetenceInput, CompetenceUp
 
 const prisma = new PrismaClient();
 
-const handleValidationError = (error: any, res: Response) => {
-  if (error.name === 'ZodError') {
-    return res.status(400).json({
-      statut: "error",
-      message: "Données de validation invalides",
-      data: null,
-      errors: error.errors.map((err: any) => ({
-        field: err.path.join('.'),
-        message: err.message,
-      })),
-    });
-  }
-  return false;
-};
-
 // GET /competences - Récupérer toutes les compétences
 export const getAllCompetences = async (req: Request, res: Response) => {
   console.log('getAllCompetences called');
@@ -279,5 +264,10 @@ export const deleteCompetence = async (req: Request, res: Response) => {
       });
     }
 
+    res.status(500).json({
+      statut: "error",
+      message: "Erreur lors de la suppression de la compétence",
+      data: null,
+    });
   }
 };

@@ -5,7 +5,6 @@ import {
   createCompetence,
   updateCompetence,
   deleteCompetence,
-
 } from '../controllers/competence.controller';
 
 const router = Router();
@@ -15,7 +14,6 @@ router.get('/', getAllCompetences);
 
 // GET /competences/:id - Récupérer une compétence par ID
 router.get('/:id', getCompetenceById);
-
 
 // POST /competences - Créer une nouvelle compétence
 router.post('/', createCompetence);
