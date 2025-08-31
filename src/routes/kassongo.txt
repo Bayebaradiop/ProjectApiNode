@@ -1,0 +1,18 @@
+git repository 
+git clone copy url repository li ngay deff sisa teminal 
+dossier projet bi niew cd dougou si dossier bi code . 
+
+git pull nom_de_la_branche permet de recuperer la derniere version d'une branche 
+
+pour creer une branche on peut faire git branch nom_de_la_branche
+git checkout nom_de_la_branche permet de se positionner sur la branche
+git checkout -b nom_de_la_branche permet de creer et se positionner sur la branche
+modification
+
+chaque fonctionnalité est une nouvelle branche 
+chaque sous fonctionnalité d'une fonctionnalité est un commit 
+
+ mapathe/ajouter-profil branche featureX (fonctionalite)
+ sous fonctionnalite et que ça passe je fais un commit 
+
+ en ajoutant une autre sous fonctionalite je gache le code je peut revenir a l'etat precedent

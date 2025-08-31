@@ -5,6 +5,8 @@ import userRoutes from './routes/user.routes';
 import competenceRoutes from './routes/competence.routes';
 import competenceNiveauRoutes from './routes/competence-niveau.routes';
 import niveauRoutes from './routes/niveau.routes';
+import profilSortieRoutes from './routes/profilSortie.routes';
+import promoRoutes from './routes/ promo.routes';
 
 const app = express();
 
@@ -18,6 +20,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/competences', competenceRoutes);
 app.use('/api/competences', competenceNiveauRoutes);
 app.use('/api/niveaux', niveauRoutes);
+app.use('/api/profils-sortie', profilSortieRoutes);
+app.use('/api/promos', promoRoutes);
 
 
 app.get('/api/health', (req, res) => {
