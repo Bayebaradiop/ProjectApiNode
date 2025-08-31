@@ -11,15 +11,16 @@ L'API ECSA (Electronic Competency and Skills Assessment) est une plateforme comp
 
 ### 🔗 APIs Disponibles
 
-| API | Description | Routes | Documentation |
-|-----|-------------|--------|---------------|
-| **Compétences & Niveaux** | Gestion des compétences et niveaux | `/api/competences`, `/api/niveaux` | [📄 COMPETENCES_API.md](./COMPETENCES_API.md) |
-| **Utilisateurs** | Gestion des utilisateurs | `/api/users` | [📄 USERS_API.md](./USERS_API.md) |
-| **Profils** | Gestion des profils utilisateur | `/api/profiles` | [📄 PROFILES_API.md](./PROFILES_API.md) |
-| **Profils de Sortie** | Gestion des profils de sortie | `/api/profilSortie` | [📄 PROFILSORTIE_API.md](./PROFILSORTIE_API.md) |
-| **Promotions** | Gestion des promotions | `/api/promos` | [📄 PROMOS_API.md](./PROMOS_API.md) |
-| **Référentiels** | Gestion des référentiels | `/api/referentiels` | [📄 REFERENTIELS_API.md](./REFERENTIELS_API.md) |
-| **Tags** | Gestion des tags | `/api/tags` | [📄 TAGS_API.md](./TAGS_API.md) |
+| API | Description | Routes | Documentation | README |
+|-----|-------------|--------|---------------|--------|
+| **Compétences** | Gestion des compétences et relations compétence-niveau | `/api/competences` | [📄 COMPETENCES_API.md](./COMPETENCES_API.md) | [📖 README](./README_COMPETENCES.md) |
+| **Niveaux** | Gestion des niveaux de compétence | `/api/niveaux` | [📄 NIVEAUX_API.md](./NIVEAUX_API.md) | [📖 README](./README_NIVEAUX.md) |
+| **Utilisateurs** | Gestion des utilisateurs | `/api/users` | [📄 USERS_API.md](./USERS_API.md) | - |
+| **Profils** | Gestion des profils utilisateur | `/api/profiles` | [📄 PROFILES_API.md](./PROFILES_API.md) | - |
+| **Profils de Sortie** | Gestion des profils de sortie | `/api/profilSortie` | [📄 PROFILSORTIE_API.md](./PROFILSORTIE_API.md) | - |
+| **Promotions** | Gestion des promotions | `/api/promos` | [📄 PROMOS_API.md](./PROMOS_API.md) | - |
+| **Référentiels** | Gestion des référentiels | `/api/referentiels` | [📄 REFERENTIELS_API.md](./REFERENTIELS_API.md) | - |
+| **Tags** | Gestion des tags | `/api/tags` | [📄 TAGS_API.md](./TAGS_API.md) | - |
 
 ## 🛠️ Technologies
 
