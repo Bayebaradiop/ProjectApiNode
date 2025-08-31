@@ -203,6 +203,7 @@ export const deleteReferentiel = async (req: Request, res: Response) => {
     });
   }
 };
+
 // POST /referentiels/:id/competences - Ajouter une compétence à un référentiel
 export const addCompetenceToReferentiel = async (req: Request, res: Response) => {
   try {
