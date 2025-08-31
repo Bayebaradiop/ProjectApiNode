@@ -312,7 +312,6 @@ async function main() {
         nom: 'Promotion 2024-2025',
         dateDebut: new Date('2024-09-01'),
         dateFin: new Date('2025-06-30'),
-        referentielId: refDevWeb.id,
       },
     });
 
@@ -323,8 +322,21 @@ async function main() {
         nom: 'Promotion 2025-2026',
         dateDebut: new Date('2025-09-01'),
         dateFin: new Date('2026-06-30'),
-        referentielId: refData.id,
       },
+    });
+
+    // 10. Associer les référentiels aux promotions
+    console.log('📚 Association des référentiels aux promotions...');
+    await prisma.promoReferentiel.upsert({
+      where: { promoId_referentielId: { promoId: promo2024.id, referentielId: refDevWeb.id } },
+      update: {},
+      create: { promoId: promo2024.id, referentielId: refDevWeb.id },
+    });
+
+    await prisma.promoReferentiel.upsert({
+      where: { promoId_referentielId: { promoId: promo2025.id, referentielId: refData.id } },
+      update: {},
+      create: { promoId: promo2025.id, referentielId: refData.id },
     });
 
     // 10. Assigner les formateurs aux promotions
