@@ -7,8 +7,7 @@ async function main() {
   console.log('🌱 Début du seeding de la base de données ECSA...');
 
   try {
-    // 1. Créer les profils utilisateur
-    console.log('📝 Création des profils utilisateur...');
+    // 1. Profils
     const adminProfile = await prisma.profile.upsert({
       where: { nom: 'ADMIN' },
       update: {},
@@ -33,8 +32,7 @@ async function main() {
       create: { nom: 'CM' },
     });
 
-    // 2. Créer les profils de sortie
-    console.log('🎯 Création des profils de sortie...');
+    // 2. Profils de sortie
     const devFrontProfile = await prisma.profilSortie.upsert({
       where: { nom: 'Développeur Front-End' },
       update: {},
@@ -59,120 +57,83 @@ async function main() {
       create: { nom: 'Data Analyst' },
     });
 
+    // 3. Niveaux
+    const [niveau1, niveau2, niveau3] = await Promise.all([
+      prisma.niveau.upsert({ where: { nom: 'N1' }, update: {}, create: { nom: 'N1' } }),
+      prisma.niveau.upsert({ where: { nom: 'N2' }, update: {}, create: { nom: 'N2' } }),
+      prisma.niveau.upsert({ where: { nom: 'N3' }, update: {}, create: { nom: 'N3' } }),
+    ]);
 
-    // 3. Créer les niveaux de compétence
-    console.log('📊 Création des niveaux de compétence...');
-    const niveau1 = await prisma.niveau.upsert({
-      where: { nom: 'Niveau 1 - Débutant' },
-      update: {},
-      create: { nom: 'Niveau 1 - Débutant' },
+    // 4. Compétences
+    const [htmlCss, js, react, node, sql] = await Promise.all([
+      prisma.competence.upsert({
+        where: { nom: 'Maîtriser HTML/CSS' },
+        update: {},
+        create: {
+          nom: 'Maîtriser HTML/CSS',
+          description: 'Créer des interfaces web responsives avec HTML5 et CSS3',
+        },
+      }),
+      prisma.competence.upsert({
+        where: { nom: 'Développer avec JavaScript' },
+        update: {},
+        create: {
+          nom: 'Développer avec JavaScript',
+          description: 'Utiliser JavaScript pour créer des interactions dynamiques',
+        },
+      }),
+      prisma.competence.upsert({
+        where: { nom: 'Utiliser React' },
+        update: {},
+        create: {
+          nom: 'Utiliser React',
+          description: 'Développer des applications web avec React',
+        },
+      }),
+      prisma.competence.upsert({
+        where: { nom: 'Développer avec Node.js' },
+        update: {},
+        create: {
+          nom: 'Développer avec Node.js',
+          description: 'Créer des APIs REST avec Node.js et Express',
+        },
+      }),
+      prisma.competence.upsert({
+        where: { nom: 'Maîtriser SQL' },
+        update: {},
+        create: {
+          nom: 'Maîtriser SQL',
+          description: 'Gérer les bases de données relationnelles avec SQL',
+        },
+      }),
+    ]);
+
+    // 5. Liaisons compétences-niveaux
+    const niveauMap = [niveau1, niveau2];
+    for (const niveau of niveauMap) {
+      await prisma.competenceNiveau.upsert({
+        where: { competenceId_niveauId: { competenceId: htmlCss.id, niveauId: niveau.id } },
+        update: {},
+        create: { competenceId: htmlCss.id, niveauId: niveau.id },
+      });
+
+      await prisma.competenceNiveau.upsert({
+        where: { competenceId_niveauId: { competenceId: js.id, niveauId: niveau.id } },
+        update: {},
+        create: { competenceId: js.id, niveauId: niveau.id },
+      });
+    }
+
+    await prisma.competenceNiveau.createMany({
+      data: [
+        { competenceId: react.id, niveauId: niveau2.id },
+        { competenceId: node.id, niveauId: niveau2.id },
+        { competenceId: sql.id, niveauId: niveau1.id },
+      ],
+      skipDuplicates: true,
     });
 
-    const niveau2 = await prisma.niveau.upsert({
-      where: { nom: 'Niveau 2 - Intermédiaire' },
-      update: {},
-      create: { nom: 'Niveau 2 - Intermédiaire' },
-    });
-
-    const niveau3 = await prisma.niveau.upsert({
-      where: { nom: 'Niveau 3 - Avancé' },
-      update: {},
-      create: { nom: 'Niveau 3 - Avancé' },
-    });
-
-    // 4. Créer les compétences
-    console.log('🛠️ Création des compétences...');
-    const htmlCssCompetence = await prisma.competence.upsert({
-      where: { nom: 'Maîtriser HTML/CSS' },
-      update: {},
-      create: {
-        nom: 'Maîtriser HTML/CSS',
-        description: 'Créer des interfaces web responsives avec HTML5 et CSS3',
-      },
-    });
-
-    const javascriptCompetence = await prisma.competence.upsert({
-      where: { nom: 'Développer avec JavaScript' },
-      update: {},
-      create: {
-        nom: 'Développer avec JavaScript',
-        description: 'Utiliser JavaScript pour créer des interactions dynamiques',
-      },
-    });
-
-    const reactCompetence = await prisma.competence.upsert({
-      where: { nom: 'Utiliser React' },
-      update: {},
-      create: {
-        nom: 'Utiliser React',
-        description: 'Développer des applications web avec React',
-      },
-    });
-
-    const nodeCompetence = await prisma.competence.upsert({
-      where: { nom: 'Développer avec Node.js' },
-      update: {},
-      create: {
-        nom: 'Développer avec Node.js',
-        description: 'Créer des APIs REST avec Node.js et Express',
-      },
-    });
-
-    const sqlCompetence = await prisma.competence.upsert({
-      where: { nom: 'Maîtriser SQL' },
-      update: {},
-      create: {
-        nom: 'Maîtriser SQL',
-        description: 'Gérer les bases de données relationnelles avec SQL',
-      },
-    });
-
-    // 5. Associer compétences et niveaux
-    console.log('🔗 Association compétences-niveaux...');
-    await prisma.competenceNiveau.upsert({
-      where: { competenceId_niveauId: { competenceId: htmlCssCompetence.id, niveauId: niveau1.id } },
-      update: {},
-      create: { competenceId: htmlCssCompetence.id, niveauId: niveau1.id },
-    });
-
-    await prisma.competenceNiveau.upsert({
-      where: { competenceId_niveauId: { competenceId: htmlCssCompetence.id, niveauId: niveau2.id } },
-      update: {},
-      create: { competenceId: htmlCssCompetence.id, niveauId: niveau2.id },
-    });
-
-    await prisma.competenceNiveau.upsert({
-      where: { competenceId_niveauId: { competenceId: javascriptCompetence.id, niveauId: niveau1.id } },
-      update: {},
-      create: { competenceId: javascriptCompetence.id, niveauId: niveau1.id },
-    });
-
-    await prisma.competenceNiveau.upsert({
-      where: { competenceId_niveauId: { competenceId: javascriptCompetence.id, niveauId: niveau2.id } },
-      update: {},
-      create: { competenceId: javascriptCompetence.id, niveauId: niveau2.id },
-    });
-
-    await prisma.competenceNiveau.upsert({
-      where: { competenceId_niveauId: { competenceId: reactCompetence.id, niveauId: niveau2.id } },
-      update: {},
-      create: { competenceId: reactCompetence.id, niveauId: niveau2.id },
-    });
-
-    await prisma.competenceNiveau.upsert({
-      where: { competenceId_niveauId: { competenceId: nodeCompetence.id, niveauId: niveau2.id } },
-      update: {},
-      create: { competenceId: nodeCompetence.id, niveauId: niveau2.id },
-    });
-
-    await prisma.competenceNiveau.upsert({
-      where: { competenceId_niveauId: { competenceId: sqlCompetence.id, niveauId: niveau1.id } },
-      update: {},
-      create: { competenceId: sqlCompetence.id, niveauId: niveau1.id },
-    });
-
-    // 6. Créer les référentiels
-    console.log('📚 Création des référentiels...');
+    // 6. Référentiels
     const refDevWeb = await prisma.referentiel.upsert({
       where: { nom: 'Référentiel Développement Web' },
       update: {},
@@ -187,47 +148,26 @@ async function main() {
       update: {},
       create: {
         nom: 'Référentiel Data & Analytics',
-        description: 'Parcours pour maîtriser l\'analyse de données',
+        description: "Parcours pour maîtriser l'analyse de données",
       },
     });
 
-    // 7. Associer référentiels et compétences
-    console.log('🔗 Association référentiels-compétences...');
-    await prisma.referentielCompetence.upsert({
-      where: { referentielId_competenceId: { referentielId: refDevWeb.id, competenceId: htmlCssCompetence.id } },
-      update: {},
-      create: { referentielId: refDevWeb.id, competenceId: htmlCssCompetence.id },
+    // 7. Compétences associées aux référentiels
+    await prisma.referentielCompetence.createMany({
+      data: [
+        { referentielId: refDevWeb.id, competenceId: htmlCss.id },
+        { referentielId: refDevWeb.id, competenceId: js.id },
+        { referentielId: refDevWeb.id, competenceId: react.id },
+        { referentielId: refDevWeb.id, competenceId: node.id },
+        { referentielId: refData.id, competenceId: sql.id },
+      ],
+      skipDuplicates: true,
     });
 
-    await prisma.referentielCompetence.upsert({
-      where: { referentielId_competenceId: { referentielId: refDevWeb.id, competenceId: javascriptCompetence.id } },
-      update: {},
-      create: { referentielId: refDevWeb.id, competenceId: javascriptCompetence.id },
-    });
-
-    await prisma.referentielCompetence.upsert({
-      where: { referentielId_competenceId: { referentielId: refDevWeb.id, competenceId: reactCompetence.id } },
-      update: {},
-      create: { referentielId: refDevWeb.id, competenceId: reactCompetence.id },
-    });
-
-    await prisma.referentielCompetence.upsert({
-      where: { referentielId_competenceId: { referentielId: refDevWeb.id, competenceId: nodeCompetence.id } },
-      update: {},
-      create: { referentielId: refDevWeb.id, competenceId: nodeCompetence.id },
-    });
-
-    await prisma.referentielCompetence.upsert({
-      where: { referentielId_competenceId: { referentielId: refData.id, competenceId: sqlCompetence.id } },
-      update: {},
-      create: { referentielId: refData.id, competenceId: sqlCompetence.id },
-    });
-
-    // 8. Créer les utilisateurs avec hashage des mots de passe
-    console.log('👥 Création des utilisateurs...');
+    // 8. Utilisateurs
     const hashedPassword = await bcrypt.hash('password123', 10);
 
-    const adminUser = await prisma.user.upsert({
+    const admin = await prisma.user.upsert({
       where: { email: 'admin@ecsa.sn' },
       update: {},
       create: {
@@ -291,7 +231,7 @@ async function main() {
       },
     });
 
-    const cmUser = await prisma.user.upsert({
+    const cm = await prisma.user.upsert({
       where: { email: 'cm@ecsa.sn' },
       update: {},
       create: {
@@ -303,8 +243,7 @@ async function main() {
       },
     });
 
-    // 9. Créer les promotions
-    console.log('📅 Création des promotions...');
+    // 9. Promotions
     const promo2024 = await prisma.promo.upsert({
       where: { nom: 'Promotion 2024-2025' },
       update: {},
@@ -312,7 +251,6 @@ async function main() {
         nom: 'Promotion 2024-2025',
         dateDebut: new Date('2024-09-01'),
         dateFin: new Date('2025-06-30'),
-        referentielId: refDevWeb.id,
       },
     });
 
@@ -323,26 +261,30 @@ async function main() {
         nom: 'Promotion 2025-2026',
         dateDebut: new Date('2025-09-01'),
         dateFin: new Date('2026-06-30'),
-        referentielId: refData.id,
       },
     });
 
-    // 10. Assigner les formateurs aux promotions
-    console.log('👨‍🏫 Assignation des formateurs aux promotions...');
-    await prisma.promoFormateurs.upsert({
-      where: { promoId_userId: { promoId: promo2024.id, userId: formateur1.id } },
-      update: {},
-      create: { promoId: promo2024.id, userId: formateur1.id },
+    // 10. Lien promo <-> référentiel
+    await prisma.promoReferentiel.createMany({
+      data: [
+        { promoId: promo2024.id, referentielId: refDevWeb.id },
+        { promoId: promo2025.id, referentielId: refData.id },
+      ],
+      skipDuplicates: true,
     });
 
-    await prisma.promoFormateurs.upsert({
-      where: { promoId_userId: { promoId: promo2025.id, userId: formateur2.id } },
-      update: {},
-      create: { promoId: promo2025.id, userId: formateur2.id },
+    // 11. Formateurs dans les promos
+    await prisma.promoFormateurs.createMany({
+      data: [
+        { promoId: promo2024.id, userId: formateur1.id },
+        { promoId: promo2025.id, userId: formateur2.id },
+      ],
+      skipDuplicates: true,
     });
 
+    // ✅ Résumé
     console.log('🎉 Seeding terminé avec succès !');
-    console.log('📊 Résumé des données créées :');
+    console.log('📊 Résumé :');
     console.log(`   - ${await prisma.profile.count()} profils`);
     console.log(`   - ${await prisma.profilSortie.count()} profils de sortie`);
     console.log(`   - ${await prisma.niveau.count()} niveaux`);
@@ -350,20 +292,15 @@ async function main() {
     console.log(`   - ${await prisma.referentiel.count()} référentiels`);
     console.log(`   - ${await prisma.user.count()} utilisateurs`);
     console.log(`   - ${await prisma.promo.count()} promotions`);
+    console.log(`   - ${await prisma.promoReferentiel.count()} associations promo/référentiel`);
     console.log('\n🔐 Mot de passe par défaut pour tous les utilisateurs : password123');
-    console.log('📧 Comptes créés : admin@ecsa.sn, formateur1@ecsa.sn, apprenant1@ecsa.sn, etc.');
-
+    console.log('📧 Emails créés : admin@ecsa.sn, formateur1@ecsa.sn, apprenant1@ecsa.sn, etc.');
   } catch (error) {
-    console.error(' Erreur lors du seeding :', error);
-    throw error;
+    console.error('❌ Erreur lors du seeding :', error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-main()
-  .catch((e) => {
-    console.error(' Erreur lors du seeding :', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main();
