@@ -1,4 +1,4 @@
-{
+{ 
   "name": "projectnode",
   "version": "1.0.0",
   "description": "Projet API Node.js pour Suivi des Apprenants ECSA",
@@ -11,7 +11,8 @@
     "lint": "eslint src/**/*.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "sederbi": "ts-node prisma/seed.ts"
   },
   "keywords": [
     "nodejs",
