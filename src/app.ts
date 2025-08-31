@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import userRoutes from './routes/user.routes';
+import competenceRoutes from './routes/competence.routes';
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/competences', competenceRoutes);
 
 
 app.get('/api/health', (req, res) => {

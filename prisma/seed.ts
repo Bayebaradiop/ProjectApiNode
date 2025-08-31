@@ -59,6 +59,7 @@ async function main() {
       create: { nom: 'Data Analyst' },
     });
 
+
     // 3. Créer les niveaux de compétence
     console.log('📊 Création des niveaux de compétence...');
     const niveau1 = await prisma.niveau.upsert({
@@ -353,14 +354,14 @@ async function main() {
     console.log('📧 Comptes créés : admin@ecsa.sn, formateur1@ecsa.sn, apprenant1@ecsa.sn, etc.');
 
   } catch (error) {
-    console.error('❌ Erreur lors du seeding :', error);
+    console.error(' Erreur lors du seeding :', error);
     throw error;
   }
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Erreur lors du seeding :', e);
+    console.error(' Erreur lors du seeding :', e);
     process.exit(1);
   })
   .finally(async () => {
