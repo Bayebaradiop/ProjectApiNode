@@ -13,8 +13,9 @@ L'API ECSA (Electronic Competency and Skills Assessment) est une plateforme comp
 
 | API | Description | Routes | Documentation | README |
 |-----|-------------|--------|---------------|--------|
-| **Compétences** | Gestion des compétences et relations compétence-niveau | `/api/competences` | [📄 COMPETENCES_API.md](./COMPETENCES_API.md) | [📖 README](./README_COMPETENCES.md) |
-| **Niveaux** | Gestion des niveaux de compétence | `/api/niveaux` | [📄 NIVEAUX_API.md](./NIVEAUX_API.md) | [📖 README](./README_NIVEAUX.md) |
+| **Compétences (Base)** | CRUD des compétences | `/api/competences` | [📄 COMPETENCES_API.md](./COMPETENCES_API.md) | [📖 Base](./README_COMPETENCES_BASE.md) |
+| **Compétences (Relations)** | Gestion compétence-niveau | `/api/competences/:id/niveaux` | [📄 COMPETENCES_API.md](./COMPETENCES_API.md) | [📖 Relations](./README_COMPETENCES_NIVEAUX.md) |
+| **Niveaux** | Gestion des niveaux | `/api/niveaux` | [📄 NIVEAUX_API.md](./NIVEAUX_API.md) | [📖 README](./README_NIVEAUX.md) |
 | **Utilisateurs** | Gestion des utilisateurs | `/api/users` | [📄 USERS_API.md](./USERS_API.md) | - |
 | **Profils** | Gestion des profils utilisateur | `/api/profiles` | [📄 PROFILES_API.md](./PROFILES_API.md) | - |
 | **Profils de Sortie** | Gestion des profils de sortie | `/api/profilSortie` | [📄 PROFILSORTIE_API.md](./PROFILSORTIE_API.md) | - |

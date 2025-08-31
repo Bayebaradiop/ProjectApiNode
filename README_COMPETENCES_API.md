@@ -149,6 +149,11 @@ Des collections Postman sont disponibles :
 
 📖 **[Documentation détaillée](COMPETENCES_API.md)** - Spécifications complètes des endpoints
 
+## APIs séparées
+
+🔗 **[API Compétences de Base](README_COMPETENCES_BASE.md)** - Gestion CRUD des compétences
+🔗 **[API Relations Compétence-Niveau](README_COMPETENCES_NIVEAUX.md)** - Gestion des relations compétence-niveau
+
 ## Support
 
 Pour toute question ou problème, consultez :
