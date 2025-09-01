@@ -4,7 +4,6 @@ import { createTag, deleteTag, getAllTags, getTagById, updateTag } from '../cont
 
 const router = Router();
 
-// Routes
 router.get('/', getAllTags);
 router.get('/:id', getTagById);
 router.post('/', createTag); 
