@@ -57,6 +57,15 @@ curl -X POST http://localhost:3000/api/competences \
   -H "Content-Type: application/json" \
   -d '{
     "nom": "Intelligence Artificielle",
+    "description": "Compétences en IA et machine learning"{
+    "nom": "Intelligence Artificielle",
+    "description": "Compétences en IA et machine learning"
+  }
+  }{
+    "nom": "Intelligence Artific{
+    "nom": "Intelligence Artificielle",
+    "description": "Compétences en IA et machine learning"
+  }ielle",
     "description": "Compétences en IA et machine learning"
   }'
 ```
