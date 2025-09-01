@@ -10,6 +10,7 @@ import promoRoutes from './routes/promo.routes';
 import dotenv from 'dotenv'
 import referentielRoutes from './routes/referentiel.routes';
 import tagRoutes from './routes/tag.routes';
+import profileRoutes from './routes/profile.routes';
 
 const app = express();
 
@@ -27,8 +28,10 @@ app.use('/api/profils-sortie', profilSortieRoutes);
 app.use('/api/promos', promoRoutes);
 app.use('/api/referentiels', referentielRoutes);
 app.use('/api/tags', tagRoutes);
-
+app.use('/api/profiles', profileRoutes);
 app.use("/api/tags", tagRoutes)
+
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     statut: "success",
