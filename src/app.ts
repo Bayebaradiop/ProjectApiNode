@@ -28,7 +28,7 @@ app.use('/api/promos', promoRoutes);
 app.use('/api/referentiels', referentielRoutes);
 app.use('/api/tags', tagRoutes);
 
-app.use("/api/tags" , tagRoutes)
+app.use("/api/tags", tagRoutes)
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     statut: "success",

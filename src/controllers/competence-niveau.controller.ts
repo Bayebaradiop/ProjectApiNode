@@ -197,6 +197,7 @@ export const addNiveauToCompetence = async (req: Request, res: Response) => {
   }
 };
 
+
 // PUT /competences/:competenceId/niveaux/:niveauId - Modifier la relation compétence-niveau
 export const updateCompetenceNiveau = async (req: Request, res: Response) => {
   try {
