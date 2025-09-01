@@ -19,15 +19,13 @@ const handleValidationError = (error: any, res: Response) => {
   return false;
 };
 
-// GET /referentiels - Liste de tous les référentiels
+// ----------------------
+// GET /referentiels
+// ----------------------
 export const getAllReferentiels = async (req: Request, res: Response) => {
   try {
     const referentiels = await prisma.referentiel.findMany({
-      include: {
-        competences: true,
-        users: true,
-        promos: true
-      }
+      include: { competences: true, users: true, promos: true }
     });
 
     res.status(200).json({
@@ -37,15 +35,13 @@ export const getAllReferentiels = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Erreur lors de la récupération des référentiels:", error);
-    res.status(500).json({
-      statut: "error",
-      message: "Erreur lors de la récupération des référentiels",
-      data: null,
-    });
+    res.status(500).json({ statut: "error", message: "Erreur lors de la récupération des référentiels", data: null });
   }
 };
 
-// GET /referentiels/:id - Récupérer un référentiel par ID
+// ----------------------
+// GET /referentiels/:id
+// ----------------------
 export const getReferentielById = async (req: Request, res: Response) => {
   try {
     const validationResult = referentielIdSchema.safeParse({ params: req.params });
@@ -55,37 +51,21 @@ export const getReferentielById = async (req: Request, res: Response) => {
 
     const referentiel = await prisma.referentiel.findUnique({
       where: { id },
-      include: {
-        competences: true,
-        users: true,
-        promos: true
-      }
+      include: { competences: true, users: true, promos: true }
     });
 
-    if (!referentiel) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Référentiel non trouvé",
-        data: null,
-      });
-    }
+    if (!referentiel) return res.status(404).json({ statut: "error", message: "Référentiel non trouvé", data: null });
 
-    res.status(200).json({
-      statut: "success",
-      message: "Référentiel récupéré avec succès",
-      data: referentiel,
-    });
+    res.status(200).json({ statut: "success", message: "Référentiel récupéré avec succès", data: referentiel });
   } catch (error) {
     console.error("Erreur lors de la récupération du référentiel:", error);
-    res.status(500).json({
-      statut: "error",
-      message: "Erreur lors de la récupération du référentiel",
-      data: null,
-    });
+    res.status(500).json({ statut: "error", message: "Erreur lors de la récupération du référentiel", data: null });
   }
 };
 
-// POST /referentiels - Créer un nouveau référentiel
+// ----------------------
+// POST /referentiels
+// ----------------------
 export const createReferentiel = async (req: Request, res: Response) => {
   try {
     const validationResult = createReferentielSchema.safeParse({ body: req.body });
@@ -93,84 +73,46 @@ export const createReferentiel = async (req: Request, res: Response) => {
 
     const { nom, description } = validationResult.data.body;
 
-    const newReferentiel = await prisma.referentiel.create({
-      data: { nom, description }
-    });
+    const newReferentiel = await prisma.referentiel.create({ data: { nom, description } });
 
-    res.status(201).json({
-      statut: "success",
-      message: "Référentiel créé avec succès",
-      data: newReferentiel,
-    });
+    res.status(201).json({ statut: "success", message: "Référentiel créé avec succès", data: newReferentiel });
   } catch (error: any) {
     console.error("Erreur lors de la création du référentiel:", error);
-    if (error.code === 'P2002') {
-      return res.status(409).json({
-        statut: "error",
-        message: "Un référentiel avec ce nom existe déjà",
-        data: null,
-      });
-    }
-    res.status(500).json({
-      statut: "error",
-      message: "Erreur lors de la création du référentiel",
-      data: null,
-    });
+    if (error.code === 'P2002') return res.status(409).json({ statut: "error", message: "Un référentiel avec ce nom existe déjà", data: null });
+    res.status(500).json({ statut: "error", message: "Erreur lors de la création du référentiel", data: null });
   }
 };
 
-// PUT /referentiels/:id - Mettre à jour un référentiel
+// ----------------------
+// PUT /referentiels/:id
+// ----------------------
 export const updateReferentiel = async (req: Request, res: Response) => {
   try {
-    const validationResult = updateReferentielSchema.safeParse({
-      params: req.params,
-      body: req.body
-    });
+    const validationResult = updateReferentielSchema.safeParse({ params: req.params, body: req.body });
     if (!validationResult.success) return handleValidationError(validationResult.error, res);
 
     const { id } = validationResult.data.params;
     const { nom, description } = validationResult.data.body;
 
     const existingReferentiel = await prisma.referentiel.findUnique({ where: { id } });
-    if (!existingReferentiel) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Référentiel non trouvé",
-        data: null,
-      });
-    }
+    if (!existingReferentiel) return res.status(404).json({ statut: "error", message: "Référentiel non trouvé", data: null });
 
     const updatedReferentiel = await prisma.referentiel.update({
       where: { id },
-      data: {
-        ...(nom && { nom }),
-        ...(description && { description })
-      },
+      data: { ...(nom && { nom }), ...(description && { description }) },
     });
 
-    res.status(200).json({
-      statut: "success",
-      message: "Référentiel mis à jour avec succès",
-      data: updatedReferentiel,
-    });
+    res.status(200).json({ statut: "success", message: "Référentiel mis à jour avec succès", data: updatedReferentiel });
   } catch (error: any) {
     console.error("Erreur lors de la mise à jour du référentiel:", error);
-    if (error.code === 'P2002') {
-      return res.status(409).json({
-        statut: "error",
-        message: "Un référentiel avec ce nom existe déjà",
-        data: null,
-      });
-    }
-    res.status(500).json({
-      statut: "error",
-      message: "Erreur lors de la mise à jour du référentiel",
-      data: null,
-    });
+    if (error.code === 'P2002') return res.status(409).json({ statut: "error", message: "Un référentiel avec ce nom existe déjà", data: null });
+    res.status(500).json({ statut: "error", message: "Erreur lors de la mise à jour du référentiel", data: null });
   }
 };
 
-// DELETE /referentiels/:id - Supprimer un référentiel
+// ----------------------
+// DELETE /referentiels/:id
+// ----------------------
 export const deleteReferentiel = async (req: Request, res: Response) => {
   try {
     const validationResult = referentielIdSchema.safeParse({ params: req.params });
@@ -179,123 +121,22 @@ export const deleteReferentiel = async (req: Request, res: Response) => {
     const { id } = validationResult.data.params;
 
     const existingReferentiel = await prisma.referentiel.findUnique({ where: { id } });
-    if (!existingReferentiel) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Référentiel non trouvé",
-        data: null,
-      });
-    }
+    if (!existingReferentiel) return res.status(404).json({ statut: "error", message: "Référentiel non trouvé", data: null });
+
+    // Supprimer relations et dépendances
+    await prisma.referentielCompetence.deleteMany({ where: { referentielId: id } });
+    await prisma.promoReferentiel.deleteMany({ where: { referentielId: id } });
+    await prisma.user.updateMany({ where: { referentielId: id }, data: { referentielId: null } });
 
     await prisma.referentiel.delete({ where: { id } });
 
-    res.status(200).json({
-      statut: "success",
-      message: "Référentiel supprimé avec succès",
-      data: null,
-    });
+    res.status(200).json({ statut: "success", message: "Référentiel supprimé avec succès", data: null });
   } catch (error) {
     console.error("Erreur lors de la suppression du référentiel:", error);
-    res.status(500).json({
-      statut: "error",
-      message: "Erreur lors de la suppression du référentiel",
-      data: null,
-    });
+    res.status(500).json({ statut: "error", message: "Impossible de supprimer le référentiel", data: null });
   }
 };
-// POST /referentiels/:id/competences - Ajouter une compétence à un référentiel
-export const addCompetenceToReferentiel = async (req: Request, res: Response) => {
-  try {
-    // Validation de l'ID du référentiel
-    const validationResult = referentielIdSchema.safeParse({ params: req.params });
-    if (!validationResult.success) return handleValidationError(validationResult.error, res);
 
-    const { id: referentielId } = validationResult.data.params;
-
-    // Vérifier si le référentiel existe
-    const referentiel = await prisma.referentiel.findUnique({
-      where: { id: referentielId }
-    });
-
-    if (!referentiel) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Référentiel non trouvé",
-        data: null
-      });
-    }
-
-    // Validation du corps de la requête
-  const bodyValidationResult = addCompetenceSchema.safeParse(req.body);
-
-if (!bodyValidationResult.success) {
-  return handleValidationError(bodyValidationResult.error, res);
-}
-
-const { competenceId } = bodyValidationResult.data;
-
-    // Vérifier si la compétence existe
-    const competence = await prisma.competence.findUnique({
-      where: { id: competenceId }
-    });
-
-    if (!competence) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Compétence non trouvée",
-        data: null
-      });
-    }
-
-    // Vérifier si la relation existe déjà
-    const existingRelation = await prisma.referentielCompetence.findUnique({
-      where: {
-        referentielId_competenceId: {
-          referentielId,
-          competenceId
-        }
-      }
-    });
-
-    if (existingRelation) {
-      return res.status(409).json({
-        statut: "error",
-        message: "Cette compétence est déjà associée à ce référentiel",
-        data: null
-      });
-    }
-
-    // Créer la relation
-    const newRelation = await prisma.referentielCompetence.create({
-      data: {
-        referentielId,
-        competenceId
-      },
-      include: {
-        competence: true,
-        referentiel: true
-      }
-    });
-
-    res.status(201).json({
-      statut: "success",
-      message: "Compétence ajoutée au référentiel avec succès",
-      data: newRelation
-    });
-
-  } catch (error: any) {
-    console.error("Erreur lors de l'ajout de compétence au référentiel:", error);
-    if (error.code === 'P2002') {
-      return res.status(409).json({
-        statut: "error",
-        message: "Cette compétence est déjà associée à ce référentiel",
-        data: null
-      });
-    }
-    res.status(500).json({
-      statut: "error",
-      message: "Erreur lors de l'ajout de compétence au référentiel",
-      data: null
-    });
-  }
-};
+// ----------------------
+// POST /referentiels/:id/competences
+// ----------------------

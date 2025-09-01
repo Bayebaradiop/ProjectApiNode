@@ -1,12 +1,13 @@
 import { Router } from 'express';
+import referentielCompetenceRoutes from './referentielCompetence.Routes';
 import {    
   getAllReferentiels,
   getReferentielById,
   createReferentiel,
   updateReferentiel,
   deleteReferentiel,
-  addCompetenceToReferentiel
 } from '../controllers/referentiel.controller';
+
 
 const router = Router();
 
@@ -24,6 +25,8 @@ router.put('/:id', updateReferentiel);
 
 // DELETE /users/:id - Supprimer un utilisateur
 router.delete('/:id', deleteReferentiel);
-router.post('/:id/competences', addCompetenceToReferentiel);
+
+router.use('/:id/competences', referentielCompetenceRoutes);
+
 
 export default router;
