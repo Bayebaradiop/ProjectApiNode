@@ -46,4 +46,8 @@ export class UserService {
   async getUserByEmail(email: string) {
     return await userRepository.findByEmail(email);
   }
+
+  async verifyPassword(email: string, password: string) {
+    return await userRepository.verifyPassword(email, password);
+  }
 }
