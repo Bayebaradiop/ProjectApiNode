@@ -30,10 +30,21 @@ export const getReferentielCompetenceById = async (req: Request, res: Response) 
     const competenceId = parseInt(req.params.competenceId);
 
     if (isNaN(referentielId) || isNaN(competenceId)) {
+      const errors = [];
+      if (isNaN(referentielId)) errors.push("params.referentielId: L'ID du référentiel doit être un nombre valide");
+      if (isNaN(competenceId)) errors.push("params.competenceId: L'ID de la compétence doit être un nombre valide");
+
       return res.status(400).json({
         statut: "error",
-        message: "IDs invalides",
+        message: "Erreurs de validation détectées",
         data: null,
+        errors: errors.map((msg, index) => ({
+          field: msg.split(':')[0],
+          message: msg.split(':')[1].trim(),
+          code: "VALIDATION_ERROR",
+        })),
+        summary: errors,
+        totalErrors: errors.length,
       });
     }
 
@@ -70,11 +81,25 @@ export const createReferentielCompetence = async (req: Request, res: Response) =
     const { referentielId, competenceId } = req.body;
 
     // Validation basique
-    if (!referentielId || !competenceId || typeof referentielId !== 'number' || typeof competenceId !== 'number') {
+    const errors = [];
+    if (!referentielId) errors.push("body.referentielId: Le référentielId est requis");
+    else if (typeof referentielId !== 'number') errors.push("body.referentielId: Le référentielId doit être un nombre");
+
+    if (!competenceId) errors.push("body.competenceId: Le competenceId est requis");
+    else if (typeof competenceId !== 'number') errors.push("body.competenceId: Le competenceId doit être un nombre");
+
+    if (errors.length > 0) {
       return res.status(400).json({
         statut: "error",
-        message: "referentielId et competenceId sont requis et doivent être des nombres",
+        message: "Erreurs de validation détectées",
         data: null,
+        errors: errors.map((msg, index) => ({
+          field: msg.split(':')[0],
+          message: msg.split(':')[1].trim(),
+          code: "VALIDATION_ERROR",
+        })),
+        summary: errors,
+        totalErrors: errors.length,
       });
     }
 

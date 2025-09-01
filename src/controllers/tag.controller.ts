@@ -29,15 +29,7 @@ export const getTagById = async (req: Request, res: Response) => {
   try {
     const validationResult = tagIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID tag invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
     const { id: tagId } = validationResult.data.params;
     const tag = await tagService.getTagById(tagId);
@@ -142,15 +134,7 @@ export const deleteTag = async (req: Request, res: Response) => {
   try {
     const validationResult = tagIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID tag invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
     const { id: tagId } = validationResult.data.params;
     const existingTag = await tagService.getTagById(tagId);

@@ -66,3 +66,5 @@ export class PromoService {
     await prisma.promo.delete({ where: { id } });
   }
 }
+
+

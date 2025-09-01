@@ -33,15 +33,7 @@ export const getUserById = async (req: Request, res: Response) => {
   try {
     const validationResult = userIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID utilisateur invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: userId } = validationResult.data.params;
@@ -211,15 +203,7 @@ export const deleteUser = async (req: Request, res: Response) => {
     // Validation des paramètres avec Zod
     const validationResult = userIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID utilisateur invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: userId } = validationResult.data.params;

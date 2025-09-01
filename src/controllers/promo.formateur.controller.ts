@@ -8,15 +8,7 @@ export const getFormateursByPromo = async (req: Request, res: Response) => {
   try {
     const validationResult = promoIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID promo invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: promoId } = validationResult.data.params;
@@ -58,15 +50,7 @@ export const addFormateurToPromo = async (req: Request, res: Response) => {
     });
 
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: promoId } = validationResult.data.params;
@@ -119,15 +103,7 @@ export const removeFormateurFromPromo = async (req: Request, res: Response) => {
   try {
     const validationResult = removeFormateurSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Paramètres invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: promoId, userId } = validationResult.data.params;

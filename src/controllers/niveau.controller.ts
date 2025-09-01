@@ -33,8 +33,15 @@ export const getNiveauById = async (req: Request, res: Response) => {
     if (isNaN(id)) {
       return res.status(400).json({
         statut: "error",
-        message: "ID de niveau invalide",
+        message: "Erreurs de validation détectées",
         data: null,
+        errors: [{
+          field: "params.id",
+          message: "L'ID doit être un nombre valide",
+          code: "VALIDATION_ERROR",
+        }],
+        summary: ["params.id: L'ID doit être un nombre valide"],
+        totalErrors: 1,
       });
     }
 

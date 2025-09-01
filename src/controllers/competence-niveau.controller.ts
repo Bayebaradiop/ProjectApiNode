@@ -60,15 +60,7 @@ export const addNiveauToCompetence = async (req: Request, res: Response) => {
     // Validation des données d'entrée
     const validationResult = addNiveauToCompetenceSchema.safeParse(req.body);
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { niveauId } = validationResult.data;
@@ -141,15 +133,7 @@ export const updateCompetenceNiveau = async (req: Request, res: Response) => {
     // Validation des données d'entrée
     const validationResult = addNiveauToCompetenceSchema.safeParse(req.body);
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { niveauId: newNiveauId } = validationResult.data;

@@ -28,15 +28,7 @@ export const getProfileById = async (req: Request, res: Response) => {
   try {
     const validationResult = profileIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID profil invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: profileId } = validationResult.data.params;
@@ -154,15 +146,7 @@ export const deleteProfile = async (req: Request, res: Response) => {
   try {
     const validationResult = profileIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID profil invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: profileId } = validationResult.data.params;
