@@ -7,6 +7,8 @@ import competenceNiveauRoutes from './routes/competence-niveau.routes';
 import niveauRoutes from './routes/niveau.routes';
 import profilSortieRoutes from './routes/profilSortie.routes';
 import promoRoutes from './routes/ promo.routes';
+import dotenv from 'dotenv'
+import referentielRoutes from './routes/referentiel.routes';
 
 const app = express();
 
@@ -22,6 +24,7 @@ app.use('/api/competences', competenceNiveauRoutes);
 app.use('/api/niveaux', niveauRoutes);
 app.use('/api/profils-sortie', profilSortieRoutes);
 app.use('/api/promos', promoRoutes);
+app.use('/api/referentiels', referentielRoutes);
 
 
 app.get('/api/health', (req, res) => {

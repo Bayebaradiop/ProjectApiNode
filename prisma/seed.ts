@@ -298,6 +298,7 @@ async function main() {
   } catch (error) {
     console.error('❌ Erreur lors du seeding :', error);
     process.exit(1);
+    // process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
