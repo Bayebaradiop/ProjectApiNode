@@ -1,63 +1,37 @@
 import { PrismaClient } from '@prisma/client';
+import { ReferentielRepository, CompetenceRepository } from '../repositories';
 
 const prisma = new PrismaClient();
+const referentielRepository = new ReferentielRepository(prisma);
+const competenceRepository = new CompetenceRepository(prisma);
 
 export class ReferentielService {
   async getAllReferentiels() {
-    return await prisma.referentiel.findMany({
-      include: {
-        competences: true,
-        users: true,
-        promos: true
-      }
-    });
+    return await referentielRepository.findAllWithRelations();
   }
 
   async getReferentielById(id: number) {
-    return await prisma.referentiel.findUnique({
-      where: { id },
-      include: {
-        competences: true,
-        users: true,
-        promos: true
-      }
-    });
+    return await referentielRepository.findByIdWithRelations(id);
   }
 
   async createReferentiel(data: { nom: string; description?: string }) {
-    return await prisma.referentiel.create({
-      data
-    });
+    return await referentielRepository.create(data);
   }
 
   async updateReferentiel(id: number, data: { nom?: string; description?: string }) {
-    return await prisma.referentiel.update({
-      where: { id },
-      data
-    });
+    return await referentielRepository.update(id, data);
   }
 
   async deleteReferentiel(id: number) {
-    await prisma.referentiel.delete({ where: { id } });
+    await referentielRepository.delete(id);
   }
 
   async addCompetenceToReferentiel(referentielId: number, competenceId: number) {
-    return await prisma.referentielCompetence.create({
-      data: {
-        referentielId,
-        competenceId
-      },
-      include: {
-        competence: true,
-        referentiel: true
-      }
-    });
+    return await referentielRepository.addCompetence(referentielId, competenceId);
   }
 
   async checkCompetenceExists(competenceId: number) {
-    return await prisma.competence.findUnique({
-      where: { id: competenceId }
-    });
+    return await competenceRepository.exists(competenceId);
   }
 
   async checkReferentielCompetenceExists(referentielId: number, competenceId: number) {

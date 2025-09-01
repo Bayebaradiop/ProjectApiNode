@@ -1,22 +1,16 @@
 import { PrismaClient } from '@prisma/client';
+import { UserRepository } from '../repositories';
 
 const prisma = new PrismaClient();
+const userRepository = new UserRepository(prisma);
 
 export class UserService {
   async getAllUsers() {
-    return await prisma.user.findMany({
-      include: {
-        profile: true,
-        profilSortie: true,
-        referentiel: true
-      }
-    });
+    return await userRepository.findAllWithRelations();
   }
 
   async getUserById(userId: number) {
-    return await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    return await userRepository.findByIdWithRelations(userId);
   }
 
   async createUser(data: {
@@ -29,26 +23,7 @@ export class UserService {
     profilSortieId?: number;
     referentielId?: number;
   }) {
-    const { nom, email, password, profileId, profilSortieId, referentielId } = data;
-
-    return await prisma.user.create({
-      data: {
-        username: nom,
-        email,
-        password,
-        profileId,
-        profilSortieId,
-        referentielId,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        profileId: true,
-        profilSortieId: true,
-        referentielId: true,
-      },
-    });
+    return await userRepository.create(data);
   }
 
   async updateUser(userId: number, data: {
@@ -61,32 +36,14 @@ export class UserService {
     profilSortieId?: number | null;
     referentielId?: number | null;
   }) {
-    const { nom, email, password, profileId, profilSortieId, referentielId } = data;
-
-    return await prisma.user.update({
-      where: { id: userId },
-      data: {
-        ...(nom && { username: nom }),
-        ...(email && { email }),
-        ...(password && { password }),
-        ...(profileId && { profileId }),
-        ...(profilSortieId !== undefined && { profilSortieId }),
-        ...(referentielId !== undefined && { referentielId }),
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        profileId: true,
-        profilSortieId: true,
-        referentielId: true,
-      },
-    });
+    return await userRepository.update(userId, data);
   }
 
   async deleteUser(userId: number) {
-    await prisma.user.delete({
-      where: { id: userId },
-    });
+    await userRepository.delete(userId);
+  }
+
+  async getUserByEmail(email: string) {
+    return await userRepository.findByEmail(email);
   }
 }

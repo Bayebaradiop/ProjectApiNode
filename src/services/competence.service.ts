@@ -1,87 +1,28 @@
 import { PrismaClient } from '@prisma/client';
 import { CompetenceInput, CompetenceUpdateInput } from '../validators/competence.validator';
+import { CompetenceRepository } from '../repositories';
 
 const prisma = new PrismaClient();
+const competenceRepository = new CompetenceRepository(prisma);
 
 export class CompetenceService {
   async getAllCompetences() {
-    return await prisma.competence.findMany({
-      include: {
-        niveaux: {
-          include: {
-            niveau: true
-          }
-        },
-        referentiels: {
-          include: {
-            referentiel: true
-          }
-        }
-      },
-      orderBy: {
-        nom: 'asc'
-      }
-    });
+    return await competenceRepository.findAllWithRelations();
   }
 
   async getCompetenceById(id: number) {
-    return await prisma.competence.findUnique({
-      where: { id },
-      include: {
-        niveaux: {
-          include: {
-            niveau: true
-          }
-        },
-        referentiels: {
-          include: {
-            referentiel: true
-          }
-        }
-      }
-    });
+    return await competenceRepository.findByIdWithRelations(id);
   }
 
   async createCompetence(data: CompetenceInput) {
-    return await prisma.competence.create({
-      data,
-      include: {
-        niveaux: {
-          include: {
-            niveau: true
-          }
-        },
-        referentiels: {
-          include: {
-            referentiel: true
-          }
-        }
-      }
-    });
+    return await competenceRepository.create(data);
   }
 
   async updateCompetence(id: number, data: CompetenceUpdateInput) {
-    return await prisma.competence.update({
-      where: { id },
-      data,
-      include: {
-        niveaux: {
-          include: {
-            niveau: true
-          }
-        },
-        referentiels: {
-          include: {
-            referentiel: true
-          }
-        }
-      }
-    });
+    return await competenceRepository.update(id, data);
   }
 
   async deleteCompetence(id: number) {
-    await prisma.competence.delete({
-      where: { id }
-    });
+    await competenceRepository.delete(id);
   }
 }

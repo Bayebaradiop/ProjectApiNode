@@ -1,56 +1,28 @@
 import { PrismaClient } from '@prisma/client';
 import { CreateProfilSortieInput, UpdateProfilSortieInput } from '../validators/profilSortie.validator';
+import { ProfilSortieRepository } from '../repositories';
 
 const prisma = new PrismaClient();
+const profilSortieRepository = new ProfilSortieRepository(prisma);
 
 export class ProfilSortieService {
   async getAllProfilSorties() {
-    return await prisma.profilSortie.findMany({
-      include: {
-        users: true,
-      }
-    });
+    return await profilSortieRepository.findAllWithRelations();
   }
 
   async getProfilSortieById(profilSortieId: number) {
-    return await prisma.profilSortie.findUnique({
-      where: { id: profilSortieId },
-      include: {
-        users: true,
-      }
-    });
+    return await profilSortieRepository.findByIdWithRelations(profilSortieId);
   }
 
   async createProfilSortie(data: CreateProfilSortieInput) {
-    const { nom } = data;
-
-    return await prisma.profilSortie.create({
-      data: {
-        nom,
-      },
-      include: {
-        users: true,
-      }
-    });
+    return await profilSortieRepository.create(data);
   }
 
   async updateProfilSortie(profilSortieId: number, data: UpdateProfilSortieInput) {
-    const { nom } = data;
-
-    return await prisma.profilSortie.update({
-      where: { id: profilSortieId },
-      data: {
-        ...(nom && { nom }),
-      },
-      include: {
-        users: true,
-      }
-    });
+    return await profilSortieRepository.update(profilSortieId, data);
   }
 
   async deleteProfilSortie(profilSortieId: number) {
-    await prisma.profilSortie.delete({
-      where: { id: profilSortieId },
-    });
+    await profilSortieRepository.delete(profilSortieId);
   }
 }

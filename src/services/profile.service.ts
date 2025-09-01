@@ -1,56 +1,28 @@
 import { PrismaClient } from '@prisma/client';
 import { CreateProfileInput, UpdateProfileInput } from '../validators/profile.validator';
+import { ProfileRepository } from '../repositories';
 
 const prisma = new PrismaClient();
+const profileRepository = new ProfileRepository(prisma);
 
 export class ProfileService {
   async getAllProfiles() {
-    return await prisma.profile.findMany({
-      include: {
-        users: true,
-      }
-    });
+    return await profileRepository.findAllWithRelations();
   }
 
   async getProfileById(profileId: number) {
-    return await prisma.profile.findUnique({
-      where: { id: profileId },
-      include: {
-        users: true,
-      }
-    });
+    return await profileRepository.findByIdWithRelations(profileId);
   }
 
   async createProfile(data: CreateProfileInput) {
-    const { nom } = data;
-
-    return await prisma.profile.create({
-      data: {
-        nom,
-      },
-      include: {
-        users: true,
-      }
-    });
+    return await profileRepository.create(data);
   }
 
   async updateProfile(profileId: number, data: UpdateProfileInput) {
-    const { nom } = data;
-
-    return await prisma.profile.update({
-      where: { id: profileId },
-      data: {
-        ...(nom && { nom }),
-      },
-      include: {
-        users: true,
-      }
-    });
+    return await profileRepository.update(profileId, data);
   }
 
   async deleteProfile(profileId: number) {
-    await prisma.profile.delete({
-      where: { id: profileId },
-    });
+    await profileRepository.delete(profileId);
   }
 }

@@ -1,60 +1,25 @@
 import { PrismaClient } from '@prisma/client';
 import { CreatePromoInput, UpdatePromoInput } from '../validators/promo.validator';
+import { PromoRepository } from '../repositories';
 
 const prisma = new PrismaClient();
+const promoRepository = new PromoRepository(prisma);
 
 export class PromoService {
   async getAllPromos() {
-    const promos = await prisma.promo.findMany({
-      include: { formateurs: true }
-    });
-    // Pour chaque promo, récupérer les référentiels associés via la table de jointure
-    const promosWithReferentiels = await Promise.all(promos.map(async promo => {
-      const referentiels = await prisma.promoReferentiel.findMany({
-        where: { promoId: promo.id },
-        include: { referentiel: true }
-      });
-      return { ...promo, referentiels: referentiels.map(r => r.referentiel) };
-    }));
-    return promosWithReferentiels;
+    return await promoRepository.findAllWithRelations();
   }
 
   async getPromoById(id: number) {
-    const promo = await prisma.promo.findUnique({
-      where: { id },
-      include: { formateurs: true }
-    });
-    if (!promo) {
-      return null;
-    }
-    const referentiels = await prisma.promoReferentiel.findMany({
-      where: { promoId: promo.id },
-      include: { referentiel: true }
-    });
-    return { ...promo, referentiels: referentiels.map(r => r.referentiel) };
+    return await promoRepository.findByIdWithRelations(id);
   }
 
   async createPromo(data: CreatePromoInput) {
-    const { nom, dateDebut, dateFin } = data;
-    return await prisma.promo.create({
-      data: {
-        nom,
-        dateDebut: new Date(dateDebut),
-        dateFin: new Date(dateFin),
-      },
-    });
+    return await promoRepository.create(data);
   }
 
   async updatePromo(id: number, data: UpdatePromoInput) {
-    const { nom, dateDebut, dateFin } = data;
-    return await prisma.promo.update({
-      where: { id },
-      data: {
-        ...(nom && { nom }),
-        ...(dateDebut && { dateDebut: new Date(dateDebut) }),
-        ...(dateFin && { dateFin: new Date(dateFin) }),
-      },
-    });
+    return await promoRepository.update(id, data);
   }
 
   async deletePromo(id: number) {
@@ -63,7 +28,7 @@ export class PromoService {
     await prisma.promoFormateurs.deleteMany({ where: { promoId: id } });
 
     // Puis supprimer la promo
-    await prisma.promo.delete({ where: { id } });
+    await promoRepository.delete(id);
   }
 }
 

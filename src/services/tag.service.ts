@@ -1,32 +1,27 @@
 import { PrismaClient } from '@prisma/client';
+import { TagRepository } from '../repositories';
 
 const prisma = new PrismaClient();
+const tagRepository = new TagRepository(prisma);
 
 export class TagService {
   async getAllTags() {
-    return await prisma.tag.findMany();
+    return await tagRepository.findAll();
   }
 
   async getTagById(tagId: number) {
-    return await prisma.tag.findUnique({ where: { id: tagId } });
+    return await tagRepository.findById(tagId);
   }
 
   async createTag(data: { nom: string }) {
-    return await prisma.tag.create({
-      data,
-      select: { id: true, nom: true },
-    });
+    return await tagRepository.create(data);
   }
 
   async updateTag(tagId: number, data: { nom?: string }) {
-    return await prisma.tag.update({
-      where: { id: tagId },
-      data,
-      select: { id: true, nom: true },
-    });
+    return await tagRepository.update(tagId, data);
   }
 
   async deleteTag(tagId: number) {
-    await prisma.tag.delete({ where: { id: tagId } });
+    await tagRepository.delete(tagId);
   }
 }

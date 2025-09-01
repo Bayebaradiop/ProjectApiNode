@@ -1,87 +1,28 @@
 import { PrismaClient } from '@prisma/client';
 import { NiveauInput, NiveauUpdateInput } from '../validators/niveau.validator';
+import { NiveauRepository } from '../repositories';
 
 const prisma = new PrismaClient();
+const niveauRepository = new NiveauRepository(prisma);
 
 export class NiveauService {
   async getAllNiveaux() {
-    return await prisma.niveau.findMany({
-      include: {
-        competences: {
-          include: {
-            competence: {
-              select: {
-                id: true,
-                nom: true
-              }
-            }
-          }
-        }
-      },
-      orderBy: {
-        nom: 'asc'
-      }
-    });
+    return await niveauRepository.findAllWithRelations();
   }
 
   async getNiveauById(id: number) {
-    return await prisma.niveau.findUnique({
-      where: { id },
-      include: {
-        competences: {
-          include: {
-            competence: {
-              select: {
-                id: true,
-                nom: true
-              }
-            }
-          }
-        }
-      }
-    });
+    return await niveauRepository.findByIdWithRelations(id);
   }
 
   async createNiveau(data: NiveauInput) {
-    return await prisma.niveau.create({
-      data,
-      include: {
-        competences: {
-          include: {
-            competence: {
-              select: {
-                id: true,
-                nom: true
-              }
-            }
-          }
-        }
-      }
-    });
+    return await niveauRepository.create(data);
   }
 
   async updateNiveau(id: number, data: NiveauUpdateInput) {
-    return await prisma.niveau.update({
-      where: { id },
-      data,
-      include: {
-        competences: {
-          include: {
-            competence: {
-              select: {
-                id: true,
-                nom: true
-              }
-            }
-          }
-        }
-      }
-    });
+    return await niveauRepository.update(id, data);
   }
 
   async deleteNiveau(id: number) {
-    await prisma.niveau.delete({
-      where: { id }
-    });
+    await niveauRepository.delete(id);
   }
 }
