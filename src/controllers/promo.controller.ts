@@ -1,27 +1,18 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PromoService } from "../services/promo.service";
 import { createPromoSchema, updatePromoSchema, promoIdSchema } from "../validators/promo.validator";
+import { handleValidationError } from "../utils/validation.utils";
 
-const prisma = new PrismaClient();
+const promoService = new PromoService();
 
 // GET all promos
 export const getAllPromos = async (req: Request, res: Response) => {
   try {
-    const promos = await prisma.promo.findMany({
-      include: { formateurs: true }
-    });
-    // Pour chaque promo, récupérer les référentiels associés via la table de jointure
-    const promosWithReferentiels = await Promise.all(promos.map(async promo => {
-      const referentiels = await prisma.promoReferentiel.findMany({
-        where: { promoId: promo.id },
-        include: { referentiel: true }
-      });
-      return { ...promo, referentiels: referentiels.map(r => r.referentiel) };
-    }));
+    const promos = await promoService.getAllPromos();
     res.status(200).json({
       statut: "success",
       message: "Liste des promos récupérée avec succès",
-      data: promosWithReferentiels,
+      data: promos,
     });
   } catch (error) {
     res.status(500).json({
@@ -36,26 +27,19 @@ export const getAllPromos = async (req: Request, res: Response) => {
 export const getPromoById = async (req: Request, res: Response) => {
   const validationResult = promoIdSchema.safeParse({ params: req.params });
   if (!validationResult.success) {
-    return res.status(400).json({ statut: "error", message: "ID invalide", errors: validationResult.error.issues });
+    return handleValidationError(validationResult.error, res);
   }
 
   const { id } = validationResult.data.params;
   try {
-    const promo = await prisma.promo.findUnique({
-      where: { id },
-      include: { formateurs: true }
-    });
+    const promo = await promoService.getPromoById(id);
     if (!promo) {
       return res.status(404).json({ statut: "error", message: "Promo non trouvée", data: null });
     }
-    const referentiels = await prisma.promoReferentiel.findMany({
-      where: { promoId: promo.id },
-      include: { referentiel: true }
-    });
     res.status(200).json({
       statut: "success",
       message: "Promo récupérée avec succès",
-      data: { ...promo, referentiels: referentiels.map(r => r.referentiel) }
+      data: promo
     });
   } catch (error) {
     res.status(500).json({ statut: "error", message: "Erreur lors de la récupération de la promo", data: null });
@@ -66,18 +50,12 @@ export const getPromoById = async (req: Request, res: Response) => {
 export const createPromo = async (req: Request, res: Response) => {
   const validationResult = createPromoSchema.safeParse({ body: req.body });
   if (!validationResult.success) {
-    return res.status(400).json({ statut: "error", message: "Données invalides", errors: validationResult.error.issues });
+    return handleValidationError(validationResult.error, res);
   }
 
   const { nom, dateDebut, dateFin } = validationResult.data.body;
   try {
-    const newPromo = await prisma.promo.create({
-      data: {
-        nom,
-        dateDebut: new Date(dateDebut),
-        dateFin: new Date(dateFin),
-      },
-    });
+    const newPromo = await promoService.createPromo({ nom, dateDebut, dateFin });
 
     res.status(201).json({ statut: "success", message: "Promo créée avec succès", data: newPromo });
   } catch (error: any) {
@@ -92,26 +70,19 @@ export const createPromo = async (req: Request, res: Response) => {
 export const updatePromo = async (req: Request, res: Response) => {
   const validationResult = updatePromoSchema.safeParse({ params: req.params, body: req.body });
   if (!validationResult.success) {
-    return res.status(400).json({ statut: "error", message: "Données invalides", errors: validationResult.error.issues });
+    return handleValidationError(validationResult.error, res);
   }
 
   const { id } = validationResult.data.params;
   const { nom, dateDebut, dateFin } = validationResult.data.body;
 
   try {
-    const existingPromo = await prisma.promo.findUnique({ where: { id } });
+    const existingPromo = await promoService.getPromoById(id);
     if (!existingPromo) {
       return res.status(404).json({ statut: "error", message: "Promo non trouvée" });
     }
 
-    const updatedPromo = await prisma.promo.update({
-      where: { id },
-      data: {
-        ...(nom && { nom }),
-        ...(dateDebut && { dateDebut: new Date(dateDebut) }),
-        ...(dateFin && { dateFin: new Date(dateFin) }),
-      },
-    });
+    const updatedPromo = await promoService.updatePromo(id, { nom, dateDebut, dateFin });
 
     res.status(200).json({ statut: "success", message: "Promo mise à jour avec succès", data: updatedPromo });
   } catch (error: any) {
@@ -126,22 +97,17 @@ export const updatePromo = async (req: Request, res: Response) => {
 export const deletePromo = async (req: Request, res: Response) => {
   const validationResult = promoIdSchema.safeParse({ params: req.params });
   if (!validationResult.success) {
-    return res.status(400).json({ statut: "error", message: "ID invalide", errors: validationResult.error.issues });
+    return handleValidationError(validationResult.error, res);
   }
 
   const { id } = validationResult.data.params;
   try {
-    const existingPromo = await prisma.promo.findUnique({ where: { id } });
+    const existingPromo = await promoService.getPromoById(id);
     if (!existingPromo) {
       return res.status(404).json({ statut: "error", message: "Promo non trouvée" });
     }
 
-    // Supprimer d'abord les liens dans les tables de jointure
-    await prisma.promoReferentiel.deleteMany({ where: { promoId: id } });
-    await prisma.promoFormateurs.deleteMany({ where: { promoId: id } });
-
-    // Puis supprimer la promo
-    await prisma.promo.delete({ where: { id } });
+    await promoService.deletePromo(id);
 
     res.status(200).json({ statut: "success", message: "Promo supprimée avec succès", data: null });
   } catch (error) {

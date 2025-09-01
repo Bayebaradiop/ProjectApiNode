@@ -15,4 +15,5 @@ router.post("/", createPromo);
 router.put("/:id", updatePromo);
 router.delete("/:id", deletePromo);
 
+
 export default router;

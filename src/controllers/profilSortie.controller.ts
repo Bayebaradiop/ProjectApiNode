@@ -1,31 +1,13 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { ProfilSortieService } from '../services/profilSortie.service';
 import { createProfilSortieSchema, updateProfilSortieSchema, profilSortieIdSchema, CreateProfilSortieInput, UpdateProfilSortieInput, ProfilSortieIdParams } from '../validators/profilSortie.validator';
+import { handleValidationError } from '../utils/validation.utils';
 
-const prisma = new PrismaClient();
-
-const handleValidationError = (error: any, res: Response) => {
-  if (error.name === 'ZodError') {
-    return res.status(400).json({
-      statut: "error",
-      message: "Données de validation invalides",
-      data: null,
-      errors: error.errors.map((err: any) => ({
-        field: err.path.join('.'),
-        message: err.message,
-      })),
-    });
-  }
-  return false;
-};
+const profilSortieService = new ProfilSortieService();
 
 export const getAllProfilSorties = async (req: Request, res: Response) => {
   try {
-    const profilSorties = await prisma.profilSortie.findMany({
-      include: {
-        users: true,
-      }
-    });
+    const profilSorties = await profilSortieService.getAllProfilSorties();
 
     res.status(200).json({
       statut: "success",
@@ -58,12 +40,7 @@ export const getProfilSortieById = async (req: Request, res: Response) => {
     }
 
     const { id: profilSortieId } = validationResult.data.params;
-    const profilSortie = await prisma.profilSortie.findUnique({
-      where: { id: profilSortieId },
-      include: {
-        users: true,
-      }
-    });
+    const profilSortie = await profilSortieService.getProfilSortieById(profilSortieId);
 
     if (!profilSortie) {
       return res.status(404).json({
@@ -92,27 +69,12 @@ export const createProfilSortie = async (req: Request, res: Response) => {
   try {
     const validationResult = createProfilSortieSchema.safeParse({ body: req.body });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { nom } = validationResult.data.body;
 
-    const newProfilSortie = await prisma.profilSortie.create({
-      data: {
-        nom,
-      },
-      include: {
-        users: true,
-      }
-    });
+    const newProfilSortie = await profilSortieService.createProfilSortie({ nom });
 
     res.status(201).json({
       statut: "success",
@@ -146,23 +108,13 @@ export const updateProfilSortie = async (req: Request, res: Response) => {
     });
 
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: profilSortieId } = validationResult.data.params;
     const { nom } = validationResult.data.body;
 
-    const existingProfilSortie = await prisma.profilSortie.findUnique({
-      where: { id: profilSortieId },
-    });
+    const existingProfilSortie = await profilSortieService.getProfilSortieById(profilSortieId);
 
     if (!existingProfilSortie) {
       return res.status(404).json({
@@ -172,15 +124,7 @@ export const updateProfilSortie = async (req: Request, res: Response) => {
       });
     }
 
-    const updatedProfilSortie = await prisma.profilSortie.update({
-      where: { id: profilSortieId },
-      data: {
-        ...(nom && { nom }),
-      },
-      include: {
-        users: true,
-      }
-    });
+    const updatedProfilSortie = await profilSortieService.updateProfilSortie(profilSortieId, { nom });
 
     res.status(200).json({
       statut: "success",
@@ -223,9 +167,7 @@ export const deleteProfilSortie = async (req: Request, res: Response) => {
 
     const { id: profilSortieId } = validationResult.data.params;
 
-    const existingProfilSortie = await prisma.profilSortie.findUnique({
-      where: { id: profilSortieId },
-    });
+    const existingProfilSortie = await profilSortieService.getProfilSortieById(profilSortieId);
 
     if (!existingProfilSortie) {
       return res.status(404).json({
@@ -235,9 +177,7 @@ export const deleteProfilSortie = async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.profilSortie.delete({
-      where: { id: profilSortieId },
-    });
+    await profilSortieService.deleteProfilSortie(profilSortieId);
 
     res.status(200).json({
       statut: "success",

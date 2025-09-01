@@ -1,31 +1,13 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { ProfileService } from '../services/profile.service';
 import { createProfileSchema, updateProfileSchema, profileIdSchema, CreateProfileInput, UpdateProfileInput, ProfileIdParams } from '../validators/profile.validator';
+import { handleValidationError } from '../utils/validation.utils';
 
-const prisma = new PrismaClient();
-
-const handleValidationError = (error: any, res: Response) => {
-  if (error.name === 'ZodError') {
-    return res.status(400).json({
-      statut: "error",
-      message: "Données de validation invalides",
-      data: null,
-      errors: error.errors.map((err: any) => ({
-        field: err.path.join('.'),
-        message: err.message,
-      })),
-    });
-  }
-  return false;
-};
+const profileService = new ProfileService();
 
 export const getAllProfiles = async (req: Request, res: Response) => {
   try {
-    const profiles = await prisma.profile.findMany({
-      include: {
-        users: true,
-      }
-    });
+    const profiles = await profileService.getAllProfiles();
 
     res.status(200).json({
       statut: "success",
@@ -58,12 +40,7 @@ export const getProfileById = async (req: Request, res: Response) => {
     }
 
     const { id: profileId } = validationResult.data.params;
-    const profile = await prisma.profile.findUnique({
-      where: { id: profileId },
-      include: {
-        users: true,
-      }
-    });
+    const profile = await profileService.getProfileById(profileId);
 
     if (!profile) {
       return res.status(404).json({
@@ -92,27 +69,12 @@ export const createProfile = async (req: Request, res: Response) => {
   try {
     const validationResult = createProfileSchema.safeParse({ body: req.body });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { nom } = validationResult.data.body;
 
-    const newProfile = await prisma.profile.create({
-      data: {
-        nom,
-      },
-      include: {
-        users: true,
-      }
-    });
+    const newProfile = await profileService.createProfile({ nom });
 
     res.status(201).json({
       statut: "success",
@@ -146,23 +108,13 @@ export const updateProfile = async (req: Request, res: Response) => {
     });
 
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: profileId } = validationResult.data.params;
     const { nom } = validationResult.data.body;
 
-    const existingProfile = await prisma.profile.findUnique({
-      where: { id: profileId },
-    });
+    const existingProfile = await profileService.getProfileById(profileId);
 
     if (!existingProfile) {
       return res.status(404).json({
@@ -172,15 +124,7 @@ export const updateProfile = async (req: Request, res: Response) => {
       });
     }
 
-    const updatedProfile = await prisma.profile.update({
-      where: { id: profileId },
-      data: {
-        ...(nom && { nom }),
-      },
-      include: {
-        users: true,
-      }
-    });
+    const updatedProfile = await profileService.updateProfile(profileId, { nom });
 
     res.status(200).json({
       statut: "success",
@@ -223,9 +167,7 @@ export const deleteProfile = async (req: Request, res: Response) => {
 
     const { id: profileId } = validationResult.data.params;
 
-    const existingProfile = await prisma.profile.findUnique({
-      where: { id: profileId },
-    });
+    const existingProfile = await profileService.getProfileById(profileId);
 
     if (!existingProfile) {
       return res.status(404).json({
@@ -235,9 +177,7 @@ export const deleteProfile = async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.profile.delete({
-      where: { id: profileId },
-    });
+    await profileService.deleteProfile(profileId);
 
     res.status(200).json({
       statut: "success",

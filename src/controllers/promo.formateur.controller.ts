@@ -1,23 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { promoIdSchema, addFormateurSchema, removeFormateurSchema, PromoIdParams, AddFormateurInput, RemoveFormateurParams } from '../validators/promo.validator';
-
-const prisma = new PrismaClient();
-
-const handleValidationError = (error: any, res: Response) => {
-  if (error.name === 'ZodError') {
-    return res.status(400).json({
-      statut: "error",
-      message: "Données de validation invalides",
-      data: null,
-      errors: error.errors.map((err: any) => ({
-        field: err.path.join('.'),
-        message: err.message,
-      })),
-    });
-  }
-  return false;
-};
+import { PromoFormateurService } from '../services/promo.formateur.service';
+import { handleValidationError } from '../utils/validation.utils';
 
 // GET /promos/:id/formateurs - Récupérer tous les formateurs d'une promo
 export const getFormateursByPromo = async (req: Request, res: Response) => {
@@ -37,40 +21,24 @@ export const getFormateursByPromo = async (req: Request, res: Response) => {
 
     const { id: promoId } = validationResult.data.params;
 
-    // Vérifier si la promo existe
-    const promo = await prisma.promo.findUnique({
-      where: { id: promoId },
-    });
+    try {
+      const formateurs = await PromoFormateurService.getFormateursByPromo(promoId);
 
-    if (!promo) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Promo non trouvée",
-        data: null,
+      res.status(200).json({
+        statut: "success",
+        message: "Formateurs de la promo récupérés avec succès",
+        data: formateurs,
       });
-    }
-
-    // Récupérer les formateurs de la promo
-    const formateurs = await prisma.promoFormateurs.findMany({
-      where: { promoId },
-      include: {
-        user: {
-          include: {
-            profile: true,
-            profilSortie: true,
-            referentiel: true,
-          }
-        }
+    } catch (error: any) {
+      if (error.message === 'Promo non trouvée') {
+        return res.status(404).json({
+          statut: "error",
+          message: error.message,
+          data: null,
+        });
       }
-    });
-
-    const formattedFormateurs = formateurs.map(pf => pf.user);
-
-    res.status(200).json({
-      statut: "success",
-      message: "Formateurs de la promo récupérés avec succès",
-      data: formattedFormateurs,
-    });
+      throw error;
+    }
   } catch (error) {
     console.error("Erreur lors de la récupération des formateurs:", error);
     res.status(500).json({
@@ -104,76 +72,38 @@ export const addFormateurToPromo = async (req: Request, res: Response) => {
     const { id: promoId } = validationResult.data.params;
     const { userId } = validationResult.data.body;
 
-    // Vérifier si la promo existe
-    const promo = await prisma.promo.findUnique({
-      where: { id: promoId },
-    });
+    try {
+      const result = await PromoFormateurService.addFormateurToPromo(promoId, userId);
 
-    if (!promo) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Promo non trouvée",
-        data: null,
+      res.status(201).json({
+        statut: "success",
+        message: "Formateur ajouté à la promo avec succès",
+        data: result,
       });
-    }
-
-    // Vérifier si l'utilisateur existe
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Utilisateur non trouvé",
-        data: null,
-      });
-    }
-
-    // Vérifier si l'utilisateur est déjà formateur de cette promo
-    const existingRelation = await prisma.promoFormateurs.findUnique({
-      where: {
-        promoId_userId: {
-          promoId,
-          userId,
-        }
+    } catch (error: any) {
+      if (error.message === 'Promo non trouvée') {
+        return res.status(404).json({
+          statut: "error",
+          message: error.message,
+          data: null,
+        });
       }
-    });
-
-    if (existingRelation) {
-      return res.status(409).json({
-        statut: "error",
-        message: "Cet utilisateur est déjà formateur de cette promo",
-        data: null,
-      });
-    }
-
-    // Ajouter le formateur à la promo
-    const newRelation = await prisma.promoFormateurs.create({
-      data: {
-        promoId,
-        userId,
-      },
-      include: {
-        user: {
-          include: {
-            profile: true,
-            profilSortie: true,
-            referentiel: true,
-          }
-        },
-        promo: true,
+      if (error.message === 'Utilisateur non trouvé') {
+        return res.status(404).json({
+          statut: "error",
+          message: error.message,
+          data: null,
+        });
       }
-    });
-
-    res.status(201).json({
-      statut: "success",
-      message: "Formateur ajouté à la promo avec succès",
-      data: {
-        promo: newRelation.promo,
-        formateur: newRelation.user,
-      },
-    });
+      if (error.message === 'Cet utilisateur est déjà formateur de cette promo') {
+        return res.status(409).json({
+          statut: "error",
+          message: error.message,
+          data: null,
+        });
+      }
+      throw error;
+    }
   } catch (error) {
     console.error('Erreur lors de l\'ajout du formateur:', error);
     res.status(500).json({
@@ -202,52 +132,24 @@ export const removeFormateurFromPromo = async (req: Request, res: Response) => {
 
     const { id: promoId, userId } = validationResult.data.params;
 
-    // Vérifier si la relation existe
-    const existingRelation = await prisma.promoFormateurs.findUnique({
-      where: {
-        promoId_userId: {
-          promoId,
-          userId,
-        }
-      },
-      include: {
-        user: {
-          include: {
-            profile: true,
-            profilSortie: true,
-            referentiel: true,
-          }
-        },
-        promo: true,
-      }
-    });
+    try {
+      const result = await PromoFormateurService.removeFormateurFromPromo(promoId, userId);
 
-    if (!existingRelation) {
-      return res.status(404).json({
-        statut: "error",
-        message: "Ce formateur n'est pas associé à cette promo",
-        data: null,
+      res.status(200).json({
+        statut: "success",
+        message: "Formateur supprimé de la promo avec succès",
+        data: result,
       });
-    }
-
-    // Supprimer la relation
-    await prisma.promoFormateurs.delete({
-      where: {
-        promoId_userId: {
-          promoId,
-          userId,
-        }
+    } catch (error: any) {
+      if (error.message === 'Ce formateur n\'est pas associé à cette promo') {
+        return res.status(404).json({
+          statut: "error",
+          message: error.message,
+          data: null,
+        });
       }
-    });
-
-    res.status(200).json({
-      statut: "success",
-      message: "Formateur supprimé de la promo avec succès",
-      data: {
-        promo: existingRelation.promo,
-        formateur: existingRelation.user,
-      },
-    });
+      throw error;
+    }
   } catch (error) {
     console.error('Erreur lors de la suppression du formateur:', error);
     res.status(500).json({

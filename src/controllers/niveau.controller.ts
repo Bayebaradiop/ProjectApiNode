@@ -1,44 +1,14 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { NiveauService } from '../services/niveau.service';
 import { niveauSchema, niveauUpdateSchema, NiveauInput, NiveauUpdateInput } from '../validators/niveau.validator';
+import { handleValidationError } from '../utils/validation.utils';
 
-const prisma = new PrismaClient();
-
-const handleValidationError = (error: any, res: Response) => {
-  if (error.name === 'ZodError') {
-    return res.status(400).json({
-      statut: "error",
-      message: "Données de validation invalides",
-      data: null,
-      errors: error.errors.map((err: any) => ({
-        field: err.path.join('.'),
-        message: err.message,
-      })),
-    });
-  }
-  return false;
-};
+const niveauService = new NiveauService();
 
 // GET /niveaux - Récupérer tous les niveaux
 export const getAllNiveaux = async (req: Request, res: Response) => {
   try {
-    const niveaux = await prisma.niveau.findMany({
-      include: {
-        competences: {
-          include: {
-            competence: {
-              select: {
-                id: true,
-                nom: true
-              }
-            }
-          }
-        }
-      },
-      orderBy: {
-        nom: 'asc'
-      }
-    });
+    const niveaux = await niveauService.getAllNiveaux();
 
     res.status(200).json({
       statut: "success",
@@ -68,21 +38,7 @@ export const getNiveauById = async (req: Request, res: Response) => {
       });
     }
 
-    const niveau = await prisma.niveau.findUnique({
-      where: { id },
-      include: {
-        competences: {
-          include: {
-            competence: {
-              select: {
-                id: true,
-                nom: true
-              }
-            }
-          }
-        }
-      }
-    });
+    const niveau = await niveauService.getNiveauById(id);
 
     if (!niveau) {
       return res.status(404).json({
@@ -113,34 +69,12 @@ export const createNiveau = async (req: Request, res: Response) => {
     // Validation des données d'entrée
     const validationResult = niveauSchema.safeParse(req.body);
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const niveauData: NiveauInput = validationResult.data;
 
-    const niveau = await prisma.niveau.create({
-      data: niveauData,
-      include: {
-        competences: {
-          include: {
-            competence: {
-              select: {
-                id: true,
-                nom: true
-              }
-            }
-          }
-        }
-      }
-    });
+    const niveau = await niveauService.createNiveau(niveauData);
 
     res.status(201).json({
       statut: "success",
@@ -182,35 +116,12 @@ export const updateNiveau = async (req: Request, res: Response) => {
     // Validation des données d'entrée
     const validationResult = niveauUpdateSchema.safeParse(req.body);
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const niveauData: NiveauUpdateInput = validationResult.data;
 
-    const niveau = await prisma.niveau.update({
-      where: { id },
-      data: niveauData,
-      include: {
-        competences: {
-          include: {
-            competence: {
-              select: {
-                id: true,
-                nom: true
-              }
-            }
-          }
-        }
-      }
-    });
+    const niveau = await niveauService.updateNiveau(id, niveauData);
 
     res.status(200).json({
       statut: "success",
@@ -257,9 +168,7 @@ export const deleteNiveau = async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.niveau.delete({
-      where: { id }
-    });
+    await niveauService.deleteNiveau(id);
 
     res.status(200).json({
       statut: "success",

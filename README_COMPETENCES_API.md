@@ -1,53 +1,311 @@
-# API Compétences - README
+# Test API Compétences - Postman
 
-## Vue d'ensemble
+## 📋 Endpoints Compétences
 
-L'API des compétences fournit une interface REST complète pour gérer les compétences et leurs relations avec les niveaux dans le système ECSA (École Supérieure Africaine de Codage).
+### 1. GET /competences - Récupérer toutes les compétences
 
-## Fonctionnalités principales
-
-- ✅ **CRUD complet** des compétences
-- ✅ **Gestion des relations** compétence-niveau
-- ✅ **Validation stricte** des données
-- ✅ **Messages d'erreur** en français
-- ✅ **Documentation complète** avec exemples
-
-## Endpoints disponibles
-
-### Compétences de base
-- `GET /api/competences` - Liste de toutes les compétences
-- `GET /api/competences/:id` - Détails d'une compétence
-- `POST /api/competences` - Créer une compétence
-- `PUT /api/competences/:id` - Modifier une compétence
-- `DELETE /api/competences/:id` - Supprimer une compétence
-
-### Relations compétence-niveau
-- `GET /api/competences/:id/niveaux` - Niveaux d'une compétence
-- `POST /api/competences/:id/niveaux` - Ajouter un niveau
-- `PUT /api/competences/:competenceId/niveaux/:niveauId` - Modifier la relation
-- `DELETE /api/competences/:competenceId/niveaux/:niveauId` - Supprimer un niveau
-
-## Installation et configuration
-
-### Prérequis
-- Node.js 16+
-- MySQL 8.0+
-- Prisma ORM
-
-### Installation
-```bash
-npm install
-npx prisma generate
-npx prisma db push
-npm run seed
+**Requête :**
+```http
+GET {{BASE_URL}}/competences
 ```
 
-### Démarrage
-```bash
-npm run dev
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Liste des compétences récupérée avec succès",
+  "data": [
+    {
+      "id": 1,
+      "nom": "JavaScript",
+      "description": "Langage de programmation web"
+    }
+  ]
+}
 ```
 
-L'API sera disponible sur `http://localhost:3000`
+### 2. GET /competences/:id - Récupérer une compétence par ID
+
+**Requête :**
+```http
+GET {{BASE_URL}}/competences/1
+```
+
+**Paramètres :**
+- `id` (number) : ID de la compétence
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Compétence récupérée avec succès",
+  "data": {
+    "id": 1,
+    "nom": "JavaScript",
+    "description": "Langage de programmation web"
+  }
+}
+```
+
+### 3. POST /competences - Créer une nouvelle compétence
+
+**Requête :**
+```http
+POST {{BASE_URL}}/competences
+Content-Type: application/json
+```
+
+**Corps de la requête :**
+```json
+{
+  "nom": "React",
+  "description": "Bibliothèque JavaScript pour interfaces utilisateur"
+}
+```
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Compétence créée avec succès",
+  "data": {
+    "id": 2,
+    "nom": "React",
+    "description": "Bibliothèque JavaScript pour interfaces utilisateur"
+  }
+}
+```
+
+### 4. PUT /competences/:id - Modifier une compétence
+
+**Requête :**
+```http
+PUT {{BASE_URL}}/competences/1
+Content-Type: application/json
+```
+
+**Paramètres :**
+- `id` (number) : ID de la compétence
+
+**Corps de la requête :**
+```json
+{
+  "nom": "JavaScript Avancé",
+  "description": "Concepts avancés de JavaScript"
+}
+```
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Compétence mise à jour avec succès",
+  "data": {
+    "id": 1,
+    "nom": "JavaScript Avancé",
+    "description": "Concepts avancés de JavaScript"
+  }
+}
+```
+
+### 5. DELETE /competences/:id - Supprimer une compétence
+
+**Requête :**
+```http
+DELETE {{BASE_URL}}/competences/1
+```
+
+**Paramètres :**
+- `id` (number) : ID de la compétence
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Compétence supprimée avec succès",
+  "data": null
+}
+```
+
+## 🔗 Endpoints Relations Compétence-Niveau
+
+### 6. GET /competences/:id/niveaux - Récupérer les niveaux d'une compétence
+
+**Requête :**
+```http
+GET {{BASE_URL}}/competences/1/niveaux
+```
+
+**Paramètres :**
+- `id` (number) : ID de la compétence
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Niveaux de la compétence récupérés avec succès",
+  "data": {
+    "competence": {
+      "id": 1,
+      "nom": "JavaScript"
+    },
+    "niveaux": [
+      {
+        "id": 1,
+        "nom": "Débutant",
+        "competenceNiveauId": 1
+      }
+    ],
+    "count": 1
+  }
+}
+```
+
+### 7. POST /competences/:id/niveaux - Ajouter un niveau à une compétence
+
+**Requête :**
+```http
+POST {{BASE_URL}}/competences/1/niveaux
+Content-Type: application/json
+```
+
+**Paramètres :**
+- `id` (number) : ID de la compétence
+
+**Corps de la requête :**
+```json
+{
+  "niveauId": 2
+}
+```
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Niveau ajouté à la compétence avec succès",
+  "data": {
+    "competence": {
+      "id": 1,
+      "nom": "JavaScript"
+    },
+    "niveau": {
+      "id": 2,
+      "nom": "Intermédiaire"
+    },
+    "competenceNiveauId": 1
+  }
+}
+```
+
+### 8. PUT /competences/:competenceId/niveaux/:niveauId - Modifier la relation compétence-niveau
+
+**Requête :**
+```http
+PUT {{BASE_URL}}/competences/1/niveaux/1
+Content-Type: application/json
+```
+
+**Paramètres :**
+- `competenceId` (number) : ID de la compétence
+- `niveauId` (number) : ID du niveau actuel
+
+**Corps de la requête :**
+```json
+{
+  "niveauId": 3
+}
+```
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Relation compétence-niveau mise à jour avec succès",
+  "data": {
+    "competence": {
+      "id": 1,
+      "nom": "JavaScript"
+    },
+    "niveau": {
+      "id": 3,
+      "nom": "Avancé"
+    },
+    "competenceNiveauId": 1
+  }
+}
+```
+
+### 9. DELETE /competences/:competenceId/niveaux/:niveauId - Supprimer un niveau d'une compétence
+
+**Requête :**
+```http
+DELETE {{BASE_URL}}/competences/1/niveaux/2
+```
+
+**Paramètres :**
+- `competenceId` (number) : ID de la compétence
+- `niveauId` (number) : ID du niveau à supprimer
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Niveau supprimé de la compétence avec succès",
+  "data": {
+    "competence": {
+      "id": 1,
+      "nom": "JavaScript"
+    },
+    "niveau": {
+      "id": 2,
+      "nom": "Intermédiaire"
+    },
+    "competenceNiveauId": 1
+  }
+}
+```
+
+## 🧪 Tests à effectuer
+
+### Test de validation
+1. **Nom vide :**
+   ```json
+   {
+     "nom": "",
+     "description": "Test"
+   }
+   ```
+   **Réponse attendue :** Erreur 400
+
+2. **Nom dupliqué :**
+   ```json
+   {
+     "nom": "JavaScript",
+     "description": "Dupliqué"
+   }
+   ```
+   **Réponse attendue :** Erreur 409
+
+### Test d'intégrité
+1. **Compétence inexistante :**
+   ```http
+   GET {{BASE_URL}}/competences/999
+   ```
+   **Réponse attendue :** Erreur 404
+
+2. **Relation compétence-niveau inexistante :**
+   ```http
+   DELETE {{BASE_URL}}/competences/1/niveaux/999
+   ```
+   **Réponse attendue :** Erreur 404
+
+## 📝 Notes
+
+- Le champ `nom` doit être unique
+- Le champ `description` est optionnel
+- Une compétence peut être associée à plusieurs niveaux
+- Un niveau peut être associé à plusieurs compétences
 
 ## Exemples d'utilisation
 

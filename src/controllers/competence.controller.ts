@@ -1,29 +1,14 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { CompetenceService } from '../services/competence.service';
 import { competenceSchema, competenceUpdateSchema, CompetenceInput, CompetenceUpdateInput } from '../validators/competence.validator';
+import { handleValidationError } from '../utils/validation.utils';
 
-const prisma = new PrismaClient();
+const competenceService = new CompetenceService();
 
 // GET /competences - Récupérer toutes les compétences
 export const getAllCompetences = async (req: Request, res: Response) => {
   try {
-    const competences = await prisma.competence.findMany({
-      include: {
-        niveaux: {
-          include: {
-            niveau: true
-          }
-        },
-        referentiels: {
-          include: {
-            referentiel: true
-          }
-        }
-      },
-      orderBy: {
-        nom: 'asc'
-      }
-    });
+    const competences = await competenceService.getAllCompetences();
 
     res.status(200).json({
       statut: "success",
@@ -53,21 +38,7 @@ export const getCompetenceById = async (req: Request, res: Response) => {
       });
     }
 
-    const competence = await prisma.competence.findUnique({
-      where: { id },
-      include: {
-        niveaux: {
-          include: {
-            niveau: true
-          }
-        },
-        referentiels: {
-          include: {
-            referentiel: true
-          }
-        }
-      }
-    });
+    const competence = await competenceService.getCompetenceById(id);
 
     if (!competence) {
       return res.status(404).json({
@@ -98,34 +69,12 @@ export const createCompetence = async (req: Request, res: Response) => {
     // Validation des données d'entrée
     const validationResult = competenceSchema.safeParse(req.body);
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const competenceData: CompetenceInput = validationResult.data;
 
-    const competence = await prisma.competence.create({
-      data: competenceData,
-      include: {
-        niveaux: {
-          include: {
-            niveau: true
-          }
-        },
-        referentiels: {
-          include: {
-            referentiel: true
-          }
-        }
-      }
-    });
+    const competence = await competenceService.createCompetence(competenceData);
 
     res.status(201).json({
       statut: "success",
@@ -167,35 +116,12 @@ export const updateCompetence = async (req: Request, res: Response) => {
     // Validation des données d'entrée
     const validationResult = competenceUpdateSchema.safeParse(req.body);
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const competenceData: CompetenceUpdateInput = validationResult.data;
 
-    const competence = await prisma.competence.update({
-      where: { id },
-      data: competenceData,
-      include: {
-        niveaux: {
-          include: {
-            niveau: true
-          }
-        },
-        referentiels: {
-          include: {
-            referentiel: true
-          }
-        }
-      }
-    });
+    const competence = await competenceService.updateCompetence(id, competenceData);
 
     res.status(200).json({
       statut: "success",
@@ -242,9 +168,7 @@ export const deleteCompetence = async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.competence.delete({
-      where: { id }
-    });
+    await competenceService.deleteCompetence(id);
 
     res.status(200).json({
       statut: "success",
