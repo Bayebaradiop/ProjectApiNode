@@ -1,29 +1,14 @@
 
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { TagService } from '../services/tag.service';
 import { createTagSchema, updateTagSchema, tagIdSchema, CreateTagInput, UpdateTagInput, TagIdParams } from '../validators/tag.validator';
+import { handleValidationError } from '../utils/validation.utils';
 
-const prisma = new PrismaClient();
-
-const handleValidationError = (error: any, res: Response) => {
-  if (error.name === 'ZodError') {
-    return res.status(400).json({
-      statut: "error",
-      message: "Données de validation invalides",
-      data: null,
-      errors: error.errors.map((err: any) => ({
-        field: err.path.join('.'),
-        message: err.message,
-      })),
-    });
-  }
-  return false;
-};
-
+const tagService = new TagService();
 
 export const getAllTags = async (req: Request, res: Response) => {
   try {
-    const tags = await prisma.tag.findMany();
+    const tags = await tagService.getAllTags();
     res.status(200).json({
       statut: "success",
       message: "Liste des tags récupérée avec succès",
@@ -44,18 +29,10 @@ export const getTagById = async (req: Request, res: Response) => {
   try {
     const validationResult = tagIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID tag invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
     const { id: tagId } = validationResult.data.params;
-    const tag = await prisma.tag.findUnique({ where: { id: tagId } });
+    const tag = await tagService.getTagById(tagId);
     if (!tag) {
       return res.status(404).json({
         statut: "error",
@@ -83,21 +60,10 @@ export const createTag = async (req: Request, res: Response) => {
   try {
     const validationResult = createTagSchema.safeParse({ body: req.body });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
     const { nom } = validationResult.data.body;
-    const newTag = await prisma.tag.create({
-      data: { nom },
-      select: { id: true, nom: true },
-    });
+    const newTag = await tagService.createTag({ nom });
     res.status(201).json({
       statut: "success",
       message: "Tag créé avec succès",
@@ -128,19 +94,11 @@ export const updateTag = async (req: Request, res: Response) => {
       body: req.body,
     });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
     const { id: tagId } = validationResult.data.params;
     const { nom } = validationResult.data.body;
-    const existingTag = await prisma.tag.findUnique({ where: { id: tagId } });
+    const existingTag = await tagService.getTagById(tagId);
     if (!existingTag) {
       return res.status(404).json({
         statut: "error",
@@ -148,11 +106,7 @@ export const updateTag = async (req: Request, res: Response) => {
         data: null,
       });
     }
-    const updatedTag = await prisma.tag.update({
-      where: { id: tagId },
-      data: { ...(nom && { nom }) },
-      select: { id: true, nom: true },
-    });
+    const updatedTag = await tagService.updateTag(tagId, { nom });
     res.status(200).json({
       statut: "success",
       message: "Tag mis à jour avec succès",
@@ -180,18 +134,10 @@ export const deleteTag = async (req: Request, res: Response) => {
   try {
     const validationResult = tagIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID tag invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
     const { id: tagId } = validationResult.data.params;
-    const existingTag = await prisma.tag.findUnique({ where: { id: tagId } });
+    const existingTag = await tagService.getTagById(tagId);
     if (!existingTag) {
       return res.status(404).json({
         statut: "error",
@@ -199,7 +145,7 @@ export const deleteTag = async (req: Request, res: Response) => {
         data: null,
       });
     }
-    await prisma.tag.delete({ where: { id: tagId } });
+    await tagService.deleteTag(tagId);
     res.status(200).json({
       statut: "success",
       message: "Tag supprimé avec succès",

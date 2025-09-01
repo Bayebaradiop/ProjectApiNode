@@ -282,6 +282,35 @@ async function main() {
       skipDuplicates: true,
     });
 
+    // 12. Tags
+    const [tagFrontend, tagBackend, tagDatabase, tagDevops, tagMobile] = await Promise.all([
+      prisma.tag.upsert({
+        where: { nom: 'Frontend' },
+        update: {},
+        create: { nom: 'Frontend' },
+      }),
+      prisma.tag.upsert({
+        where: { nom: 'Backend' },
+        update: {},
+        create: { nom: 'Backend' },
+      }),
+      prisma.tag.upsert({
+        where: { nom: 'Base de données' },
+        update: {},
+        create: { nom: 'Base de données' },
+      }),
+      prisma.tag.upsert({
+        where: { nom: 'DevOps' },
+        update: {},
+        create: { nom: 'DevOps' },
+      }),
+      prisma.tag.upsert({
+        where: { nom: 'Mobile' },
+        update: {},
+        create: { nom: 'Mobile' },
+      }),
+    ]);
+
     // ✅ Résumé
     console.log('🎉 Seeding terminé avec succès !');
     console.log('📊 Résumé :');
@@ -293,6 +322,7 @@ async function main() {
     console.log(`   - ${await prisma.user.count()} utilisateurs`);
     console.log(`   - ${await prisma.promo.count()} promotions`);
     console.log(`   - ${await prisma.promoReferentiel.count()} associations promo/référentiel`);
+    console.log(`   - ${await prisma.tag.count()} tags`);
     console.log('\n🔐 Mot de passe par défaut pour tous les utilisateurs : password123');
     console.log('📧 Emails créés : admin@ecsa.sn, formateur1@ecsa.sn, apprenant1@ecsa.sn, etc.');
   } catch (error) {

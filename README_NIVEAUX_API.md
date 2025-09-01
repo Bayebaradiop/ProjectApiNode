@@ -1,53 +1,165 @@
-# API Niveaux - README
+# Test API Niveaux - Postman
 
-## Vue d'ensemble
+## 📋 Endpoints Niveaux
 
-L'API des niveaux fournit une interface REST complète pour gérer les niveaux de compétence dans le système ECSA (École Supérieure Africaine de Codage). Les niveaux représentent les différents degrés de maîtrise d'une compétence (Débutant, Intermédiaire, Expert, etc.).
+### 1. GET /niveaux - Récupérer tous les niveaux
 
-## Fonctionnalités principales
-
-- ✅ **CRUD complet** des niveaux
-- ✅ **Gestion des relations** avec les compétences
-- ✅ **Validation stricte** des données
-- ✅ **Messages d'erreur** en français
-- ✅ **Documentation complète** avec exemples
-
-## Endpoints disponibles
-
-### Gestion des niveaux
-- `GET /api/niveaux` - Liste de tous les niveaux
-- `GET /api/niveaux/:id` - Détails d'un niveau
-- `POST /api/niveaux` - Créer un niveau
-- `PUT /api/niveaux/:id` - Modifier un niveau
-- `DELETE /api/niveaux/:id` - Supprimer un niveau
-
-## Installation et configuration
-
-### Prérequis
-- Node.js 16+
-- MySQL 8.0+
-- Prisma ORM
-
-### Installation
-```bash
-npm install
-npx prisma generate
-npx prisma db push
-npm run seed
+**Requête :**
+```http
+GET {{BASE_URL}}/niveaux
 ```
 
-### Démarrage
-```bash
-npm run dev
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Liste des niveaux récupérée avec succès",
+  "data": [
+    {
+      "id": 1,
+      "nom": "Débutant"
+    },
+    {
+      "id": 2,
+      "nom": "Intermédiaire"
+    },
+    {
+      "id": 3,
+      "nom": "Avancé"
+    }
+  ]
+}
 ```
 
-L'API sera disponible sur `http://localhost:3000`
+### 2. GET /niveaux/:id - Récupérer un niveau par ID
 
-## Exemples d'utilisation
+**Requête :**
+```http
+GET {{BASE_URL}}/niveaux/1
+```
 
-### Créer un niveau
-```bash
-curl -X POST http://localhost:3000/api/niveaux \
+**Paramètres :**
+- `id` (number) : ID du niveau
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Niveau récupéré avec succès",
+  "data": {
+    "id": 1,
+    "nom": "Débutant"
+  }
+}
+```
+
+### 3. POST /niveaux - Créer un nouveau niveau
+
+**Requête :**
+```http
+POST {{BASE_URL}}/niveaux
+Content-Type: application/json
+```
+
+**Corps de la requête :**
+```json
+{
+  "nom": "Expert"
+}
+```
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Niveau créé avec succès",
+  "data": {
+    "id": 4,
+    "nom": "Expert"
+  }
+}
+```
+
+### 4. PUT /niveaux/:id - Modifier un niveau
+
+**Requête :**
+```http
+PUT {{BASE_URL}}/niveaux/1
+Content-Type: application/json
+```
+
+**Paramètres :**
+- `id` (number) : ID du niveau
+
+**Corps de la requête :**
+```json
+{
+  "nom": "Novice"
+}
+```
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Niveau mis à jour avec succès",
+  "data": {
+    "id": 1,
+    "nom": "Novice"
+  }
+}
+```
+
+### 5. DELETE /niveaux/:id - Supprimer un niveau
+
+**Requête :**
+```http
+DELETE {{BASE_URL}}/niveaux/4
+```
+
+**Paramètres :**
+- `id` (number) : ID du niveau
+
+**Réponse attendue :**
+```json
+{
+  "statut": "success",
+  "message": "Niveau supprimé avec succès",
+  "data": null
+}
+```
+
+## 🧪 Tests à effectuer
+
+### Test de validation
+1. **Nom vide :**
+   ```json
+   {
+     "nom": ""
+   }
+   ```
+   **Réponse attendue :** Erreur 400
+
+2. **Nom dupliqué :**
+   ```json
+   {
+     "nom": "Débutant"
+   }
+   ```
+   **Réponse attendue :** Erreur 409
+
+### Test d'intégrité
+1. **Niveau inexistant :**
+   ```http
+   GET {{BASE_URL}}/niveaux/999
+   ```
+   **Réponse attendue :** Erreur 404
+
+## 📝 Notes
+
+- Le champ `nom` doit être unique
+- Les niveaux sont utilisés dans les relations compétence-niveau
+- Un niveau peut être associé à plusieurs compétences
   -H "Content-Type: application/json" \
   -d '{
     "nom": "Expert Confirmé"

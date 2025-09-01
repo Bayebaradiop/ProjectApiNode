@@ -1,35 +1,14 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { UserService } from '../services/user.service';
 import { createUserSchema, updateUserSchema, userIdSchema, CreateUserInput, UpdateUserInput, UserIdParams } from '../validators/user.validator';
-import { includes } from 'zod';
+import { handleValidationError } from '../utils/validation.utils';
 
-const prisma = new PrismaClient();
-
-// const handleValidationError = (error: any, res: Response) => {
-//   if (error.name === 'ZodError') {
-//     return res.status(400).json({
-//       statut: "error",
-//       message: "Données de validation invalides",
-//       data: null,
-//       errors: error.errors.map((err: any) => ({
-//         field: err.path.join('.'),
-//         message: err.message,
-//       })),
-//     });
-//   }
-//   return false; 
-// };
+const userService = new UserService();
 
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await prisma.user.findMany({
-      include: {
-        profile: true,       
-        profilSortie: true,  
-        referentiel: true   
-      }
-    });
+    const users = await userService.getAllUsers();
 
     res.status(200).json({
       statut: "success",
@@ -54,21 +33,11 @@ export const getUserById = async (req: Request, res: Response) => {
   try {
     const validationResult = userIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID utilisateur invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: userId } = validationResult.data.params;
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const user = await userService.getUserById(userId);
 
     if (!user) {
       return res.status(404).json({
@@ -101,36 +70,20 @@ export const createUser = async (req: Request, res: Response) => {
     // Validation des données avec Zod
     const validationResult = createUserSchema.safeParse({ body: req.body });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { nom, prenom, email, telephone, password, profileId, profilSortieId, referentielId } = validationResult.data.body;
 
-    const newUser = await prisma.user.create({
-      data: {
-        username: nom, // Map nom to username
-        email,
-        password, // En production, hasher le mot de passe
-        profileId,
-        profilSortieId,
-        referentielId,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        profileId: true,
-        profilSortieId: true,
-        referentielId: true,
-      },
+    const newUser = await userService.createUser({
+      nom,
+      prenom,
+      email,
+      telephone,
+      password,
+      profileId,
+      profilSortieId,
+      referentielId,
     });
 
 
@@ -180,24 +133,14 @@ export const updateUser = async (req: Request, res: Response) => {
     });
 
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "Données de validation invalides",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: userId } = validationResult.data.params;
     const { nom, prenom, email, telephone, password, profileId, profilSortieId, referentielId } = validationResult.data.body;
 
     // Vérifier si l'utilisateur existe
-    const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const existingUser = await userService.getUserById(userId);
 
     if (!existingUser) {
       return res.status(404).json({
@@ -207,24 +150,15 @@ export const updateUser = async (req: Request, res: Response) => {
       });
     }
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        ...(nom && { username: nom }), // Map nom to username
-        ...(email && { email }),
-        ...(password && { password }),
-        ...(profileId && { profileId }),
-        ...(profilSortieId !== undefined && { profilSortieId }),
-        ...(referentielId !== undefined && { referentielId }),
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        profileId: true,
-        profilSortieId: true,
-        referentielId: true,
-      },
+    const updatedUser = await userService.updateUser(userId, {
+      nom,
+      prenom,
+      email,
+      telephone,
+      password,
+      profileId,
+      profilSortieId,
+      referentielId,
     });
 
     // // Map the database fields to the expected response format
@@ -269,23 +203,13 @@ export const deleteUser = async (req: Request, res: Response) => {
     // Validation des paramètres avec Zod
     const validationResult = userIdSchema.safeParse({ params: req.params });
     if (!validationResult.success) {
-      return res.status(400).json({
-        statut: "error",
-        message: "ID utilisateur invalide",
-        data: null,
-        errors: validationResult.error.issues.map((err: any) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        })),
-      });
+      return handleValidationError(validationResult.error, res);
     }
 
     const { id: userId } = validationResult.data.params;
 
     // Vérifier si l'utilisateur existe
-    const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const existingUser = await userService.getUserById(userId);
 
     if (!existingUser) {
       return res.status(404).json({
@@ -295,9 +219,7 @@ export const deleteUser = async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.user.delete({
-      where: { id: userId },
-    });
+    await userService.deleteUser(userId);
 
     res.status(200).json({
       statut: "success",

@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
-  getAllCompetences,
-  getCompetenceById,
-  createCompetence,
-  updateCompetence,
-  deleteCompetence,
+    getAllCompetences,
+    getCompetenceById,
+    createCompetence,
+    updateCompetence,
+    deleteCompetence,
 } from '../controllers/competence.controller';
 
 const router = Router();

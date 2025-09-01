@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import {
-  getNiveauxByCompetence,
-  addNiveauToCompetence,
-  updateCompetenceNiveau,
-  removeNiveauFromCompetence,
+    getNiveauxByCompetence,
+    addNiveauToCompetence,
+    updateCompetenceNiveau,
+    removeNiveauFromCompetence,
 } from '../controllers/competence-niveau.controller';
 
 const router = Router();

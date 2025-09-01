@@ -7,9 +7,12 @@ import competenceNiveauRoutes from './routes/competence-niveau.routes';
 import niveauRoutes from './routes/niveau.routes';
 import profilSortieRoutes from './routes/profilSortie.routes';
 import promoRoutes from './routes/promo.routes';
+import promoFormateurRoutes from './routes/promoFormateur.routes';
 import dotenv from 'dotenv'
 import referentielRoutes from './routes/referentiel.routes';
 import tagRoutes from './routes/tag.routes';
+import profileRoutes from './routes/profile.routes';
+import referentielCompetenceRoutes from './routes/referentielcompetence.routes';
 
 const app = express();
 
@@ -25,10 +28,13 @@ app.use('/api/competences', competenceNiveauRoutes);
 app.use('/api/niveaux', niveauRoutes);
 app.use('/api/profils-sortie', profilSortieRoutes);
 app.use('/api/promos', promoRoutes);
+app.use('/api/promos', promoFormateurRoutes);
 app.use('/api/referentiels', referentielRoutes);
 app.use('/api/tags', tagRoutes);
+app.use('/api/profiles', profileRoutes);
+app.use('/api/referentiels-competences', referentielCompetenceRoutes);
 
-app.use("/api/tags" , tagRoutes)
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     statut: "success",

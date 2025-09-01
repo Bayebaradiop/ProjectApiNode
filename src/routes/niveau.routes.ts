@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
-  getAllNiveaux,
-  getNiveauById,
-  createNiveau,
-  updateNiveau,
-  deleteNiveau,
+    getAllNiveaux,
+    getNiveauById,
+    createNiveau,
+    updateNiveau,
+    deleteNiveau,
 } from '../controllers/niveau.controller';
 
 const router = Router();
