@@ -8,4 +8,6 @@ app.listen(PORT, () => {
   console.log(`  - GET http://localhost:${PORT}/test-db`);
   console.log(`  - GET http://localhost:${PORT}/api/info`);
   console.log(`  - GET http://localhost:${PORT}/api/competences`);
+  console.log(`  - GET http://localhost:${PORT}/api/tags`);
+
 });
