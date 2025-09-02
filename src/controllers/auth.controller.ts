@@ -48,9 +48,9 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     const { refreshToken } = validationResult.data.body;
 
-    const newAccessToken = await authService.refreshAccessToken(refreshToken);
+    const tokens = await authService.refreshAccessToken(refreshToken);
 
-    if (!newAccessToken) {
+    if (!tokens) {
       return res.status(401).json({
         statut: "error",
         message: "Refresh token invalide ou expiré",
@@ -60,8 +60,8 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     res.status(200).json({
       statut: "success",
-      message: "Token d'accès renouvelé",
-      data: { accessToken: newAccessToken },
+      message: "Tokens renouvelés avec succès",
+      data: tokens,
     });
   } catch (error) {
     console.error('Erreur lors du renouvellement du token:', error);

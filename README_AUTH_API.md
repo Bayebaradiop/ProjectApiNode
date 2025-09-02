@@ -62,9 +62,10 @@ Content-Type: application/json
 ```json
 {
   "statut": "success",
-  "message": "Token d'accès renouvelé",
+  "message": "Tokens renouvelés avec succès",
   "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTY0MjU4NzIwMCwiZXhwIjoxNjQyNTkwODAwfQ.new_signature"
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTY0MjU4NzIwMCwiZXhwIjoxNjQyNTkwODAwfQ.new_access_signature",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTY0MjU4NzIwMCwiZXhwIjoxNjQzMTg4NzIwMH0.new_refresh_signature"
   }
 }
 ```
@@ -143,8 +144,9 @@ Content-Type: application/json
 
 1. **Refresh token valide :**
    - Utiliser un refreshToken obtenu lors du login
-   - Vérifier qu'un nouveau accessToken est retourné
-   - Vérifier que l'ancien accessToken devient invalide
+   - Vérifier que de nouveaux tokens (access + refresh) sont retournés
+   - Vérifier que l'ancien refreshToken devient invalide (rotation des tokens)
+   - Vérifier que l'ancien accessToken reste valide jusqu'à expiration
 
 2. **Refresh token expiré :**
    - Attendre 24 heures ou modifier manuellement la date d'expiration
@@ -158,6 +160,11 @@ Content-Type: application/json
    }
    ```
    **Réponse attendue :** Erreur 401
+
+4. **Tentative de réutilisation d'un refresh token déjà utilisé :**
+   - Utiliser un refreshToken pour obtenir de nouveaux tokens
+   - Tenter de réutiliser l'ancien refreshToken
+   **Réponse attendue :** Erreur 401 (token supprimé après utilisation)
 
 ## 🔑 Utilisation des tokens
 
@@ -177,7 +184,9 @@ Content-Type: application/json
 - Les mots de passe sont hashés en base de données avec bcrypt
 - Les tokens JWT utilisent des clés secrètes distinctes pour l'accès et le rafraîchissement
 - Les refresh tokens expirés sont automatiquement supprimés de la base
-- Un utilisateur ne peut avoir qu'un refresh token actif à la fois (le nouveau remplace l'ancien)
+- **Rotation des tokens :** Lors du refresh, un nouveau refresh token est généré et l'ancien est supprimé (sécurité renforcée)
+- Un utilisateur ne peut avoir qu'un refresh token actif à la fois
+- Les anciens refresh tokens deviennent invalides immédiatement après utilisation
 - Tous les endpoints nécessitant une authentification doivent vérifier le token d'accès dans le header Authorization
 
 ## 🔧 Configuration

@@ -22,20 +22,28 @@ export class AuthService {
     return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '24h' });
   }
 
-  verifyAccessToken(token: string): TokenPayload | null {
+  verifyAccessToken(token: string): jwt.JwtPayload | null {
     try {
-      return jwt.verify(token, JWT_ACCESS_SECRET) as TokenPayload;
+      return jwt.verify(token, JWT_ACCESS_SECRET) as jwt.JwtPayload;
     } catch (error) {
       return null;
     }
   }
 
-  verifyRefreshToken(token: string): TokenPayload | null {
+  verifyRefreshToken(token: string): jwt.JwtPayload | null {
     try {
-      return jwt.verify(token, JWT_REFRESH_SECRET) as TokenPayload;
+      return jwt.verify(token, JWT_REFRESH_SECRET) as jwt.JwtPayload;
     } catch (error) {
       return null;
     }
+  }
+
+  private extractTokenPayload(payload: jwt.JwtPayload): TokenPayload | null {
+    if (!payload.userId || !payload.email) return null;
+    return {
+      userId: payload.userId,
+      email: payload.email,
+    };
   }
 
   async storeRefreshToken(userId: number, token: string): Promise<void> {
@@ -59,10 +67,7 @@ export class AuthService {
     if (!refreshToken) return false;
 
     if (refreshToken.expiresAt < new Date()) {
-      // Token expired, remove it
-      await prisma.refreshToken.delete({
-        where: { token },
-      });
+      await prisma.refreshToken.delete({ where: { token } });
       return false;
     }
 
@@ -70,14 +75,11 @@ export class AuthService {
   }
 
   async removeRefreshToken(token: string): Promise<void> {
-    await prisma.refreshToken.delete({
-      where: { token },
-    });
+    await prisma.refreshToken.delete({ where: { token } });
   }
 
   async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string } | null> {
     const user = await userService.verifyPassword(email, password);
-
     if (!user) return null;
 
     const payload: TokenPayload = {
@@ -88,22 +90,34 @@ export class AuthService {
     const accessToken = this.generateAccessToken(payload);
     const refreshToken = this.generateRefreshToken(payload);
 
-    // Store refresh token
     await this.storeRefreshToken(user.id, refreshToken);
 
     return { accessToken, refreshToken };
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<string | null> {
+  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string } | null> {
     const isValid = await this.validateRefreshToken(refreshToken);
-
     if (!isValid) return null;
 
-    const payload = this.verifyRefreshToken(refreshToken);
+    const decoded = this.verifyRefreshToken(refreshToken);
+    if (!decoded) return null;
 
+    const payload = this.extractTokenPayload(decoded);
     if (!payload) return null;
 
-    // Generate new access token
-    return this.generateAccessToken(payload);
+    const tokenRecord = await prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: true },
+    });
+
+    if (!tokenRecord) return null;
+
+    const newAccessToken = this.generateAccessToken(payload);
+    const newRefreshToken = this.generateRefreshToken(payload);
+
+    await this.removeRefreshToken(refreshToken);
+    await this.storeRefreshToken(tokenRecord.userId, newRefreshToken);
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
 }
