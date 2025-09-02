@@ -2,9 +2,15 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { rbac, requireRole } from '../dictionnaire/role.dictionary';
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
+// prefer explicit access token secret if present
+const JWT_SECRET = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'change_me';
+
+// Typages utiles
+type JwtPayload = { sub?: string | number; userId?: number; id?: number; iat?: number; exp?: number };
+type RequestUser = { id: number; email?: string; role?: string };
 
 // enrichir Request avec user
 declare global {
@@ -22,13 +28,23 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 			return res.status(401).json({ statut: 'error', message: 'Authentification requise', data: null });
 		}
 
-		const token = authHeader.split(' ')[1];
-		let payload: any;
-		try {
-			payload = jwt.verify(token, JWT_SECRET);
-		} catch {
-			return res.status(401).json({ statut: 'error', message: 'Token invalide', data: null });
-		}
+			// extract and sanitize token: remove surrounding quotes, CR/LF and trim
+			let rawToken = (authHeader.split(' ')[1] ?? '').toString();
+			rawToken = rawToken.replace(/^['"]|['"]$/g, '').replace(/\r|\n/g, '').trim();
+
+			// quick JWT basic format check (header.payload.signature)
+			const jwtFormat = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+			if (!jwtFormat.test(rawToken)) {
+				console.warn('authMiddleware: malformed Authorization token', { snippet: rawToken.slice(0, 40) });
+				return res.status(401).json({ statut: 'error', message: 'Token invalide', data: null });
+			}
+
+			let payload: JwtPayload;
+			try {
+				payload = jwt.verify(rawToken, JWT_SECRET) as JwtPayload;
+			} catch (e) {
+				return res.status(401).json({ statut: 'error', message: 'Token invalide', data: null });
+			}
 
 		const userId = Number(payload.sub ?? payload.userId ?? payload.id);
 		if (!userId) return res.status(401).json({ statut: 'error', message: 'Token invalide', data: null });
@@ -51,40 +67,6 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 };
 
 
-export const rbac = (resource?: 'parametrage' | 'users' | 'any') => {
-	return (req: Request, res: Response, next: NextFunction) => {
-		if (!req.user) return res.status(401).json({ statut: 'error', message: 'Authentification requise', data: null });
-
-		const role = (req.user.role ?? '').toLowerCase();
-		const method = req.method.toUpperCase();
-
-		let allowedRoles: string[] = [];
-
-		if (method === 'GET') {
-			allowedRoles = ['admin', 'formateur', 'cm'];
-		} else if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
-			// écriture : admin uniquement
-			allowedRoles = ['admin'];
-		} else {
-			allowedRoles = ['admin'];
-		}
-
-		if (!allowedRoles.includes(role)) {
-			return res.status(403).json({ statut: 'error', message: 'Accès refusé', data: null });
-		}
-
-		next();
-	};
-};
-
-export const requireRole = (requiredRole: string) => {
-	return (req: Request, res: Response, next: NextFunction) => {
-		if (!req.user) return res.status(401).json({ statut: 'error', message: 'Authentification requise', data: null });
-		if ((req.user.role ?? '').toLowerCase() !== requiredRole.toLowerCase()) {
-			return res.status(403).json({ statut: 'error', message: 'Accès refusé', data: null });
-		}
-		next();
-	};
-};
+// rbac and requireRole moved to src/dictionnaire/role.dictionary.ts
 
 export default authMiddleware;
