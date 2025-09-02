@@ -1,20 +1,39 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+import { ReferentielCompetenceRepository } from '../repositories/referentiel-competence.repository';    
+
 
 const prisma = new PrismaClient();
+const referentielCompetenceRepository = new ReferentielCompetenceRepository(prisma);
 
 export class ReferentielCompetenceService {
   // Récupérer toutes les associations référentiel-compétence
-  async getAllReferentielCompetences() {
-    return await prisma.referentielCompetence.findMany({
-      include: {
-        referentiel: true,
-        competence: true,
-      },
+  // async getAllReferentielCompetences() {
+  //   return await prisma.referentielCompetence.findMany({
+  //     include: {
+  //       referentiel: true,
+  //       competence: true,
+  //     },
+  //   });
+  // }
+
+  async getAllReferentielCompetences({
+    page,
+    pageSize,
+  }: {
+    page: number;
+    pageSize: number;
+  }) {
+    return await referentielCompetenceRepository.findAllPaginated({
+      page,
+      pageSize,
     });
   }
 
   // Récupérer une association par ID
-  async getReferentielCompetenceById(referentielId: number, competenceId: number) {
+  async getReferentielCompetenceById(
+    referentielId: number,
+    competenceId: number
+  ) {
     const association = await prisma.referentielCompetence.findUnique({
       where: {
         referentielId_competenceId: {
@@ -29,21 +48,24 @@ export class ReferentielCompetenceService {
     });
 
     if (!association) {
-      throw new Error('Association référentiel-compétence non trouvée');
+      throw new Error("Association référentiel-compétence non trouvée");
     }
 
     return association;
   }
 
   // Créer une nouvelle association
-  async createReferentielCompetence(data: { referentielId: number; competenceId: number }) {
+  async createReferentielCompetence(data: {
+    referentielId: number;
+    competenceId: number;
+  }) {
     // Vérifier que le référentiel existe
     const referentiel = await prisma.referentiel.findUnique({
       where: { id: data.referentielId },
     });
 
     if (!referentiel) {
-      throw new Error('Référentiel non trouvé');
+      throw new Error("Référentiel non trouvé");
     }
 
     // Vérifier que la compétence existe
@@ -52,7 +74,7 @@ export class ReferentielCompetenceService {
     });
 
     if (!competence) {
-      throw new Error('Compétence non trouvée');
+      throw new Error("Compétence non trouvée");
     }
 
     // Vérifier que l'association n'existe pas déjà
@@ -66,7 +88,7 @@ export class ReferentielCompetenceService {
     });
 
     if (existingAssociation) {
-      throw new Error('Cette compétence est déjà associée à ce référentiel');
+      throw new Error("Cette compétence est déjà associée à ce référentiel");
     }
 
     return await prisma.referentielCompetence.create({
@@ -79,7 +101,10 @@ export class ReferentielCompetenceService {
   }
 
   // Supprimer une association
-  async deleteReferentielCompetence(referentielId: number, competenceId: number) {
+  async deleteReferentielCompetence(
+    referentielId: number,
+    competenceId: number
+  ) {
     // Vérifier que l'association existe
     const association = await prisma.referentielCompetence.findUnique({
       where: {
@@ -91,7 +116,7 @@ export class ReferentielCompetenceService {
     });
 
     if (!association) {
-      throw new Error('Association référentiel-compétence non trouvée');
+      throw new Error("Association référentiel-compétence non trouvée");
     }
 
     return await prisma.referentielCompetence.delete({
@@ -116,7 +141,7 @@ export class ReferentielCompetenceService {
     });
 
     if (!referentiel) {
-      throw new Error('Référentiel non trouvé');
+      throw new Error("Référentiel non trouvé");
     }
 
     return await prisma.referentielCompetence.findMany({
@@ -135,7 +160,7 @@ export class ReferentielCompetenceService {
     });
 
     if (!competence) {
-      throw new Error('Compétence non trouvée');
+      throw new Error("Compétence non trouvée");
     }
 
     return await prisma.referentielCompetence.findMany({

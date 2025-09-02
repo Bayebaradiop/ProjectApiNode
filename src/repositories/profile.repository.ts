@@ -25,6 +25,26 @@ export class ProfileRepository extends BaseRepository implements IBaseRepository
     });
   }
 
+  async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+  const [data, total] = await Promise.all([
+    this.prisma.profile.findMany({
+      skip,
+      take,
+      include: { users: true }
+    }),
+    this.prisma.profile.count()
+  ]);
+  return {
+    data,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize)
+  };
+}
+
   async findById(id: number): Promise<Profile | null> {
     return await this.prisma.profile.findUnique({
       where: { id }

@@ -2,14 +2,15 @@ import { Request, Response } from 'express';
 import { ReferentielService } from '../services/referentiel.service';
 import { createReferentielSchema, updateReferentielSchema, referentielIdSchema, addCompetenceSchema } from '../validators/referentiel.validator';
 import { handleValidationError } from '../utils/validation.utils';
+import { getPaginationParams } from '../utils/pagination.utils';
+
 
 const referentielService = new ReferentielService();
 
 // GET /referentiels - Liste de tous les référentiels
 export const getAllReferentiels = async (req: Request, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
+  const { page, pageSize } = getPaginationParams(req);
     const result = await referentielService.getAllReferentiels({ page, pageSize });
     res.status(200).json({
       statut: "success",

@@ -2,14 +2,15 @@ import { Request, Response } from "express";
 import { PromoService } from "../services/promo.service";
 import { createPromoSchema, updatePromoSchema, promoIdSchema } from "../validators/promo.validator";
 import { handleValidationError } from "../utils/validation.utils";
+import { getPaginationParams } from '../utils/pagination.utils';
+
 
 const promoService = new PromoService();
 
 // GET all promos
 export const getAllPromos = async (req: Request, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
+  const { page, pageSize } = getPaginationParams(req);
     const result = await promoService.getAllPromos({ page, pageSize });
     res.status(200).json({
       statut: "success",

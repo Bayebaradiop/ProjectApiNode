@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { UserService } from '../services/user.service';
 import { createUserSchema, updateUserSchema, userIdSchema, CreateUserInput, UpdateUserInput, UserIdParams } from '../validators/user.validator';
 import { handleValidationError } from '../utils/validation.utils';
+import { getPaginationParams } from '../utils/pagination.utils';
+
 
 const userService = new UserService();
 

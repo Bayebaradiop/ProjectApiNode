@@ -2,12 +2,15 @@ import { Request, Response } from 'express';
 import { ProfileService } from '../services/profile.service';
 import { createProfileSchema, updateProfileSchema, profileIdSchema, CreateProfileInput, UpdateProfileInput, ProfileIdParams } from '../validators/profile.validator';
 import { handleValidationError } from '../utils/validation.utils';
+import { getPaginationParams } from '../utils/pagination.utils';
+
 
 const profileService = new ProfileService();
 
 export const getAllProfiles = async (req: Request, res: Response) => {
   try {
-    const profiles = await profileService.getAllProfiles();
+    const { page, pageSize } = getPaginationParams(req);
+    const profiles = await profileService.getAllProfiles({ page, pageSize });
 
     res.status(200).json({
       statut: "success",

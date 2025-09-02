@@ -6,10 +6,12 @@ const prisma = new PrismaClient();
 const profileRepository = new ProfileRepository(prisma);
 
 export class ProfileService {
-  async getAllProfiles() {
-    return await profileRepository.findAllWithRelations();
-  }
-
+  // async getAllProfiles() {
+  //   return await profileRepository.findAllWithRelations();
+  // }
+async getAllProfiles({ page, pageSize }: { page: number, pageSize: number }) {
+  return await profileRepository.findAllPaginated({ page, pageSize });
+}
   async getProfileById(profileId: number) {
     return await profileRepository.findByIdWithRelations(profileId);
   }

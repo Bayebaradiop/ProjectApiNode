@@ -26,6 +26,16 @@ export class ReferentielCompetenceRepository extends BaseRepository implements I
     });
   }
 
+  async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+  const [data, total] = await Promise.all([
+    this.prisma.referentielCompetence.findMany({ skip, take }),
+    this.prisma.referentielCompetence.count()
+  ]);
+  return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+}
+
   async findById(id: { referentielId: number; competenceId: number }): Promise<ReferentielCompetence | null> {
     return await this.prisma.referentielCompetence.findUnique({
       where: {

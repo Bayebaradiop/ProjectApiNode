@@ -2,14 +2,15 @@ import { Request, Response } from 'express';
 import { NiveauService } from '../services/niveau.service';
 import { niveauSchema, niveauUpdateSchema, NiveauInput, NiveauUpdateInput } from '../validators/niveau.validator';
 import { handleValidationError } from '../utils/validation.utils';
+import { getPaginationParams } from '../utils/pagination.utils';
+
 
 const niveauService = new NiveauService();
 
 // GET /niveaux - Récupérer tous les niveaux
 export const getAllNiveaux = async (req: Request, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const { page, pageSize } = getPaginationParams(req);
     const result = await niveauService.getAllNiveaux({ page, pageSize });
     res.status(200).json({
       statut: "success",

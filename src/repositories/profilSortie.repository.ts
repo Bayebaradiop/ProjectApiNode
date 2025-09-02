@@ -18,25 +18,35 @@ export class ProfilSortieRepository extends BaseRepository implements IBaseRepos
     return await this.prisma.profilSortie.findMany();
   }
 
+  // async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+  //   const skip = (page - 1) * pageSize;
+  //   const take = pageSize;
+  //   const [data, total] = await Promise.all([
+  //     this.prisma.profilSortie.findMany({
+  //       skip,
+  //       take,
+  //       include: { users: true }
+  //     }),
+  //     this.prisma.profilSortie.count()
+  //   ]);
+  //   return {
+  //     data,
+  //     total,
+  //     page,
+  //     pageSize,
+  //     totalPages: Math.ceil(total / pageSize)
+  //   };
+  // }
+
   async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
-    const skip = (page - 1) * pageSize;
-    const take = pageSize;
-    const [data, total] = await Promise.all([
-      this.prisma.profilSortie.findMany({
-        skip,
-        take,
-        include: { users: true }
-      }),
-      this.prisma.profilSortie.count()
-    ]);
-    return {
-      data,
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize)
-    };
-  }
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+  const [data, total] = await Promise.all([
+    this.prisma.profile.findMany({ skip, take }),
+    this.prisma.profile.count()
+  ]);
+  return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+}
 
   async findAllWithRelations(): Promise<ProfilSortie[]> {
     return await this.prisma.profilSortie.findMany({

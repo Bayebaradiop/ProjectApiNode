@@ -1,13 +1,16 @@
 import { Request, Response } from 'express';
 import { ReferentielCompetenceService } from '../services/referentielcompetence.service';
 import { handleValidationError } from '../utils/validation.utils';
+import { getPaginationParams } from '../utils/pagination.utils';
+
 
 const referentielCompetenceService = new ReferentielCompetenceService();
 
 // GET /referentiels-competences - Récupérer toutes les associations
 export const getAllReferentielCompetences = async (req: Request, res: Response) => {
   try {
-    const associations = await referentielCompetenceService.getAllReferentielCompetences();
+    const { page, pageSize } = getPaginationParams(req);
+    const associations = await referentielCompetenceService.getAllReferentielCompetences({ page, pageSize });
     res.status(200).json({
       statut: "success",
       message: "Liste des associations référentiel-compétence récupérée avec succès",
