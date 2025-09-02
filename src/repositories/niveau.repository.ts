@@ -12,12 +12,37 @@ export class NiveauRepository extends BaseRepository implements IBaseRepository<
     super(prisma);
   }
 
+
   async findAll(): Promise<Niveau[]> {
-    return await this.prisma.niveau.findMany({
-      orderBy: {
-        nom: 'asc'
-      }
-    });
+    // Pour compatibilité interface, retourne tout sans pagination
+    return await this.prisma.niveau.findMany({ orderBy: { nom: 'asc' } });
+  }
+
+  async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+    const [data, total] = await Promise.all([
+      this.prisma.niveau.findMany({
+        skip,
+        take,
+        include: {
+          competences: {
+            include: {
+              competence: { select: { id: true, nom: true } }
+            }
+          }
+        },
+        orderBy: { nom: 'asc' }
+      }),
+      this.prisma.niveau.count()
+    ]);
+    return {
+      data,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    };
   }
 
   async findAllWithRelations(): Promise<Niveau[]> {

@@ -8,12 +8,13 @@ const niveauService = new NiveauService();
 // GET /niveaux - Récupérer tous les niveaux
 export const getAllNiveaux = async (req: Request, res: Response) => {
   try {
-    const niveaux = await niveauService.getAllNiveaux();
-
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const result = await niveauService.getAllNiveaux({ page, pageSize });
     res.status(200).json({
       statut: "success",
       message: "Liste des niveaux récupérée avec succès",
-      data: niveaux,
+      ...result,
     });
   } catch (error) {
     console.error("Erreur lors de la récupération des niveaux:", error);

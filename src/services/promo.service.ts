@@ -6,8 +6,8 @@ const prisma = new PrismaClient();
 const promoRepository = new PromoRepository(prisma);
 
 export class PromoService {
-  async getAllPromos() {
-    return await promoRepository.findAllWithRelations();
+  async getAllPromos({ page, pageSize }: { page: number, pageSize: number }) {
+    return await promoRepository.findAllPaginated({ page, pageSize });
   }
 
   async getPromoById(id: number) {

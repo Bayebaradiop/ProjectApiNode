@@ -8,12 +8,13 @@ const competenceService = new CompetenceService();
 // GET /competences - Récupérer toutes les compétences
 export const getAllCompetences = async (req: Request, res: Response) => {
   try {
-    const competences = await competenceService.getAllCompetences();
-
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const result = await competenceService.getAllCompetences({ page, pageSize });
     res.status(200).json({
       statut: "success",
       message: "Liste des compétences récupérée avec succès",
-      data: competences,
+      ...result,
     });
   } catch (error) {
     console.error("Erreur lors de la récupération des compétences:", error);

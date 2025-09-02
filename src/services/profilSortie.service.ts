@@ -6,8 +6,8 @@ const prisma = new PrismaClient();
 const profilSortieRepository = new ProfilSortieRepository(prisma);
 
 export class ProfilSortieService {
-  async getAllProfilSorties() {
-    return await profilSortieRepository.findAllWithRelations();
+  async getAllProfilSorties({ page, pageSize }: { page: number, pageSize: number }) {
+    return await profilSortieRepository.findAllPaginated({ page, pageSize });
   }
 
   async getProfilSortieById(profilSortieId: number) {

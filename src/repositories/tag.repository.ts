@@ -12,8 +12,26 @@ export class TagRepository extends BaseRepository implements IBaseRepository<Tag
     super(prisma);
   }
 
+
   async findAll(): Promise<Tag[]> {
+    // Pour compatibilité interface, retourne tout sans pagination
     return await this.prisma.tag.findMany();
+  }
+
+  async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+    const [data, total] = await Promise.all([
+      this.prisma.tag.findMany({ skip, take }),
+      this.prisma.tag.count()
+    ]);
+    return {
+      data,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    };
   }
 
   async findById(id: number): Promise<Tag | null> {

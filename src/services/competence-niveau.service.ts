@@ -4,36 +4,29 @@ const prisma = new PrismaClient();
 
 export class CompetenceNiveauService {
   // GET /competences/:id/niveaux - Récupérer les niveaux d'une compétence
-  static async getNiveauxByCompetence(competenceId: number) {
+  static async getNiveauxByCompetence(competenceId: number, { page, pageSize }: { page: number, pageSize: number }) {
     // Vérifier si la compétence existe
     const competence = await prisma.competence.findUnique({
       where: { id: competenceId },
       select: { id: true, nom: true }
     });
-
     if (!competence) {
       throw new Error('Compétence non trouvée');
     }
-
-    // Récupérer les niveaux associés à la compétence
-    const niveauxData = await prisma.competenceNiveau.findMany({
-      where: { competenceId },
-      include: {
-        niveau: {
-          select: {
-            id: true,
-            nom: true
-          }
-        }
-      },
-      orderBy: {
-        niveau: {
-          nom: 'asc'
-        }
-      }
-    });
-
-    // Formater les données
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+    const [niveauxData, total] = await Promise.all([
+      prisma.competenceNiveau.findMany({
+        where: { competenceId },
+        include: {
+          niveau: { select: { id: true, nom: true } }
+        },
+        orderBy: { niveau: { nom: 'asc' } },
+        skip,
+        take
+      }),
+      prisma.competenceNiveau.count({ where: { competenceId } })
+    ]);
     return {
       competence: {
         id: competence.id,
@@ -44,7 +37,10 @@ export class CompetenceNiveauService {
         nom: item.niveau.nom,
         competenceNiveauId: item.competenceId,
       })),
-      count: niveauxData.length,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
     };
   }
 

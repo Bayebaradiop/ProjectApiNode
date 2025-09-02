@@ -6,8 +6,8 @@ const referentielRepository = new ReferentielRepository(prisma);
 const competenceRepository = new CompetenceRepository(prisma);
 
 export class ReferentielService {
-  async getAllReferentiels() {
-    return await referentielRepository.findAllWithRelations();
+  async getAllReferentiels({ page, pageSize }: { page: number, pageSize: number }) {
+    return await referentielRepository.findAllPaginated({ page, pageSize });
   }
 
   async getReferentielById(id: number) {

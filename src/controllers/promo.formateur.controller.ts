@@ -12,14 +12,15 @@ export const getFormateursByPromo = async (req: Request, res: Response) => {
     }
 
     const { id: promoId } = validationResult.data.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
 
     try {
-      const formateurs = await PromoFormateurService.getFormateursByPromo(promoId);
-
+      const result = await PromoFormateurService.getFormateursByPromo(promoId, { page, pageSize });
       res.status(200).json({
         statut: "success",
         message: "Formateurs de la promo récupérés avec succès",
-        data: formateurs,
+        ...result,
       });
     } catch (error: any) {
       if (error.message === 'Promo non trouvée') {

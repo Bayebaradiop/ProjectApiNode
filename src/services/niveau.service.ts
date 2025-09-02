@@ -6,8 +6,8 @@ const prisma = new PrismaClient();
 const niveauRepository = new NiveauRepository(prisma);
 
 export class NiveauService {
-  async getAllNiveaux() {
-    return await niveauRepository.findAllWithRelations();
+  async getAllNiveaux({ page, pageSize }: { page: number, pageSize: number }) {
+    return await niveauRepository.findAllPaginated({ page, pageSize });
   }
 
   async getNiveauById(id: number) {

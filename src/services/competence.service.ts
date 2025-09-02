@@ -6,8 +6,8 @@ const prisma = new PrismaClient();
 const competenceRepository = new CompetenceRepository(prisma);
 
 export class CompetenceService {
-  async getAllCompetences() {
-    return await competenceRepository.findAllWithRelations();
+  async getAllCompetences({ page, pageSize }: { page: number, pageSize: number }) {
+    return await competenceRepository.findAllPaginated({ page, pageSize });
   }
 
   async getCompetenceById(id: number) {

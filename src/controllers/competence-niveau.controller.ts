@@ -3,11 +3,10 @@ import { addNiveauToCompetenceSchema } from '../validators/competence.validator'
 import { CompetenceNiveauService } from '../services/competence-niveau.service';
 import { handleValidationError } from '../utils/validation.utils';
 
-// GET /competences/:id/niveaux - Récupérer les niveaux d'une compétence
+// GET /competences/:id/niveaux - Récupérer les niveaux d'une compétence (avec pagination)
 export const getNiveauxByCompetence = async (req: Request, res: Response) => {
   try {
     const competenceId = parseInt(req.params.id);
-
     if (isNaN(competenceId)) {
       return res.status(400).json({
         statut: "error",
@@ -15,14 +14,14 @@ export const getNiveauxByCompetence = async (req: Request, res: Response) => {
         data: null,
       });
     }
-
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
     try {
-      const formattedData = await CompetenceNiveauService.getNiveauxByCompetence(competenceId);
-
+      const result = await CompetenceNiveauService.getNiveauxByCompetence(competenceId, { page, pageSize });
       res.status(200).json({
         statut: "success",
         message: "Niveaux de la compétence récupérés avec succès",
-        data: formattedData,
+        ...result,
       });
     } catch (error: any) {
       if (error.message === 'Compétence non trouvée') {

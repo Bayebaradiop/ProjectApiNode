@@ -15,8 +15,39 @@ export class PromoRepository extends BaseRepository implements IBaseRepository<P
     super(prisma);
   }
 
+
   async findAll(): Promise<Promo[]> {
+    // Pour compatibilité interface, retourne tout sans pagination
     return await this.prisma.promo.findMany();
+  }
+
+  async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+    const [promos, total] = await Promise.all([
+      this.prisma.promo.findMany({
+        skip,
+        take,
+        include: { formateurs: true },
+        orderBy: { nom: 'asc' }
+      }),
+      this.prisma.promo.count()
+    ]);
+    // Pour chaque promo, récupérer les référentiels associés via la table de jointure
+    const promosWithReferentiels = await Promise.all(promos.map(async promo => {
+      const referentiels = await this.prisma.promoReferentiel.findMany({
+        where: { promoId: promo.id },
+        include: { referentiel: true }
+      });
+      return { ...promo, referentiels: referentiels.map(r => r.referentiel) };
+    }));
+    return {
+      data: promosWithReferentiels,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    };
   }
 
   async findAllWithRelations(): Promise<any[]> {

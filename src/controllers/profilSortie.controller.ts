@@ -7,12 +7,13 @@ const profilSortieService = new ProfilSortieService();
 
 export const getAllProfilSorties = async (req: Request, res: Response) => {
   try {
-    const profilSorties = await profilSortieService.getAllProfilSorties();
-
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const result = await profilSortieService.getAllProfilSorties({ page, pageSize });
     res.status(200).json({
       statut: "success",
       message: "Liste des profils de sortie récupérée avec succès",
-      data: profilSorties,
+      ...result,
     });
   } catch (error) {
     console.error("Erreur lors de la récupération des profils de sortie:", error);

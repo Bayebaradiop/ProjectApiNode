@@ -13,8 +13,26 @@ export class ReferentielRepository extends BaseRepository implements IBaseReposi
     super(prisma);
   }
 
+
   async findAll(): Promise<Referentiel[]> {
+    // Pour compatibilité interface, retourne tout sans pagination
     return await this.prisma.referentiel.findMany();
+  }
+
+  async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+    const [data, total] = await Promise.all([
+      this.prisma.referentiel.findMany({ skip, take, include: { competences: true, users: true, promos: true } }),
+      this.prisma.referentiel.count()
+    ]);
+    return {
+      data,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    };
   }
 
   async findAllWithRelations(): Promise<Referentiel[]> {

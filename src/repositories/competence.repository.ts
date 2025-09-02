@@ -13,12 +13,34 @@ export class CompetenceRepository extends BaseRepository implements IBaseReposit
     super(prisma);
   }
 
+
   async findAll(): Promise<Competence[]> {
-    return await this.prisma.competence.findMany({
-      orderBy: {
-        nom: 'asc'
-      }
-    });
+    // Pour compatibilité interface, retourne tout sans pagination
+    return await this.prisma.competence.findMany({ orderBy: { nom: 'asc' } });
+  }
+
+  async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+    const [data, total] = await Promise.all([
+      this.prisma.competence.findMany({
+        skip,
+        take,
+        include: {
+          niveaux: { include: { niveau: true } },
+          referentiels: { include: { referentiel: true } }
+        },
+        orderBy: { nom: 'asc' }
+      }),
+      this.prisma.competence.count()
+    ]);
+    return {
+      data,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    };
   }
 
   async findAllWithRelations(): Promise<Competence[]> {

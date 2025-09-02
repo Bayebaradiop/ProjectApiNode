@@ -12,8 +12,30 @@ export class ProfilSortieRepository extends BaseRepository implements IBaseRepos
     super(prisma);
   }
 
+
   async findAll(): Promise<ProfilSortie[]> {
+    // Pour compatibilité interface, retourne tout sans pagination
     return await this.prisma.profilSortie.findMany();
+  }
+
+  async findAllPaginated({ page, pageSize }: { page: number, pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+    const [data, total] = await Promise.all([
+      this.prisma.profilSortie.findMany({
+        skip,
+        take,
+        include: { users: true }
+      }),
+      this.prisma.profilSortie.count()
+    ]);
+    return {
+      data,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    };
   }
 
   async findAllWithRelations(): Promise<ProfilSortie[]> {

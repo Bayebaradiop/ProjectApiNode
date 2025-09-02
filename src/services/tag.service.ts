@@ -5,8 +5,8 @@ const prisma = new PrismaClient();
 const tagRepository = new TagRepository(prisma);
 
 export class TagService {
-  async getAllTags() {
-    return await tagRepository.findAll();
+  async getAllTags({ page, pageSize }: { page: number, pageSize: number }) {
+    return await tagRepository.findAllPaginated({ page, pageSize });
   }
 
   async getTagById(tagId: number) {
