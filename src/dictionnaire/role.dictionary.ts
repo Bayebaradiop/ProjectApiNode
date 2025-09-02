@@ -1,10 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-
-/**
- * Dictionnaire et middlewares RBAC centralisés.
- * - Lecture (GET) : admin, formateur, cm
- * - Ecriture (POST/PUT/DELETE/PATCH) : admin
- */
 export const rbac = (resource?: 'parametrage' | 'users' | 'any') => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) return res.status(401).json({ statut: 'error', message: 'Authentification requise', data: null });
@@ -17,12 +11,10 @@ export const rbac = (resource?: 'parametrage' | 'users' | 'any') => {
     if (method === 'GET') {
       allowedRoles = ['admin', 'formateur', 'cm'];
     } else if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
-      // écriture : admin uniquement
       allowedRoles = ['admin'];
     } else {
       allowedRoles = ['admin'];
     }
-
     if (!allowedRoles.includes(role)) {
       return res.status(403).json({ statut: 'error', message: 'Accès refusé', data: null });
     }
