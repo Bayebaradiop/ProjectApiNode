@@ -13,6 +13,7 @@ import referentielRoutes from './routes/referentiel.routes';
 import tagRoutes from './routes/tag.routes';
 import profileRoutes from './routes/profile.routes';
 import referentielCompetenceRoutes from './routes/referentielcompetence.routes';
+import authRoutes from './routes/auth.routes';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/competences', competenceRoutes);
 app.use('/api/competences', competenceNiveauRoutes);

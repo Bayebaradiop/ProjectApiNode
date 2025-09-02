@@ -1,6 +1,7 @@
 import { PrismaClient, User } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { IBaseRepository } from '../interfaces';
+import bcrypt from 'bcryptjs';
 
 // Types locaux pour les données de création
 interface UserCreateData {
@@ -53,11 +54,13 @@ export class UserRepository extends BaseRepository implements IBaseRepository<Us
   async create(data: UserCreateData): Promise<User> {
     const { nom, email, password, profileId, profilSortieId, referentielId } = data;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     return await this.prisma.user.create({
       data: {
         username: nom,
         email,
-        password,
+        password: hashedPassword,
         profileId,
         profilSortieId,
         referentielId,
@@ -74,16 +77,21 @@ export class UserRepository extends BaseRepository implements IBaseRepository<Us
   }
 
   async update(id: number, data: Partial<UserCreateData>): Promise<User> {
+    const updateData: any = {
+      username: data.nom,
+      email: data.email,
+      profileId: data.profileId,
+      profilSortieId: data.profilSortieId,
+      referentielId: data.referentielId,
+    };
+
+    if (data.password) {
+      updateData.password = await bcrypt.hash(data.password, 10);
+    }
+
     return await this.prisma.user.update({
       where: { id },
-      data: {
-        username: data.nom,
-        email: data.email,
-        password: data.password,
-        profileId: data.profileId,
-        profilSortieId: data.profilSortieId,
-        referentielId: data.referentielId,
-      }
+      data: updateData
     });
   }
 
@@ -105,5 +113,16 @@ export class UserRepository extends BaseRepository implements IBaseRepository<Us
     return await this.prisma.user.findUnique({
       where: { email }
     });
+  }
+
+  async verifyPassword(email: string, password: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) return null;
+
+    const isValid = await bcrypt.compare(password, user.password);
+    return isValid ? user : null;
   }
 }
