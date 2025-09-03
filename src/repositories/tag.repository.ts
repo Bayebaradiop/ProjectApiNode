@@ -11,6 +11,12 @@ export class TagRepository extends BaseRepository implements IBaseRepository<Tag
   constructor(prisma: PrismaClient) {
     super(prisma);
   }
+    /** Liste avec tri dynamique */
+  async findAllWithRelationsTriees(orderBy: Record<string, 'asc' | 'desc'>[]): Promise<Tag[]> {
+    return await this.prisma.tag.findMany({
+      orderBy,
+    });
+  }
 
   async findAll(): Promise<Tag[]> {
     return await this.prisma.tag.findMany();

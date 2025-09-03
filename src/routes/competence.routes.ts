@@ -5,10 +5,13 @@ import {
     createCompetence,
     updateCompetence,
     deleteCompetence,
+    getAllCompetencesTriees
 } from '../controllers/competence.controller';
 
 const router = Router();
 
+
+router.get('/sorted', getAllCompetencesTriees);
 // GET /competences - Récupérer toutes les compétences
 router.get('/', getAllCompetences);
 
@@ -22,6 +25,9 @@ router.post('/', createCompetence);
 router.put('/:id', updateCompetence);
 
 // DELETE /competences/:id - Supprimer une compétence
+
 router.delete('/:id', deleteCompetence);
+
+
 
 export default router;

@@ -5,10 +5,11 @@ import {
   createPromo,
   updatePromo,
   deletePromo,
+  getAllPromosTrieses,
 } from '../controllers/promo.controller';
 
 const router = Router();
-
+router.get("/sorted", getAllPromosTrieses);
 router.get("/", getAllPromos);
 router.get("/:id", getPromoById);
 router.post("/", createPromo);

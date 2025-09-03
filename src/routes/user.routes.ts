@@ -4,12 +4,13 @@ import {
   getUserById,
   createUser,
   updateUser,
-  deleteUser,
+  deleteUser
 } from '../controllers/user.controller';
 
 const router = Router();
 
 // GET /users - Récupérer tous les utilisateurs
+// router.get('/sorted', getAllUsersTrieses);
 router.get('/', getAllUsers);
 
 // GET /users/:id - Récupérer un utilisateur par ID

@@ -15,6 +15,17 @@ export class PromoRepository extends BaseRepository implements IBaseRepository<P
     super(prisma);
   }
 
+   /** Liste avec relations et tri dynamique */
+async findAllWithRelationsTriees(orderBy: Record<string, 'asc' | 'desc'>[]): Promise<Promo[]> {
+  return await this.prisma.promo.findMany({
+    include: {
+      formateurs: true,
+      referentiels: true,
+    },
+    orderBy,
+  });
+}
+
   async findAll(): Promise<Promo[]> {
     return await this.prisma.promo.findMany();
   }

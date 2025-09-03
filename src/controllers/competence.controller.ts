@@ -5,6 +5,32 @@ import { handleValidationError } from '../utils/validation.utils';
 
 const competenceService = new CompetenceService();
 
+
+/** Liste toutes les compétences triées */
+export const getAllCompetencesTriees = async (req: Request, res: Response) => {
+  try {
+    // Récupération des paramètres de tri depuis l'URL
+    const champ = req.query.champ as string;           // tri simple : ?champ=nom
+    const ordre = req.query.ordre as string;           // asc ou desc : ?ordre=asc
+    const triMulti = req.query.triMulti as string;    // tri multi-colonnes : ?triMulti=nom:asc,createdAt:desc
+
+    const competences = await competenceService.getAllCompetencesTriees(champ, ordre, triMulti);
+
+    res.status(200).json({
+      statut: 'success',
+      message: 'Liste des compétences triée avec succès',
+      data: competences
+    });
+  } catch (error: any) {
+    console.error('Erreur lors du tri des compétences:', error);
+    res.status(500).json({
+      statut: 'error',
+      message: 'Erreur lors du tri des compétences',
+      data: null
+    });
+  }
+};
+
 // GET /competences - Récupérer toutes les compétences
 export const getAllCompetences = async (req: Request, res: Response) => {
   try {

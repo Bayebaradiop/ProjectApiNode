@@ -5,6 +5,31 @@ import { handleValidationError } from "../utils/validation.utils";
 
 const promoService = new PromoService();
 
+
+/** Liste toutes les promos triées */
+export const getAllPromosTrieses = async (req: Request, res: Response) => {
+  try {
+    const champ = req.query.champ as string;        // tri simple : ?champ=nom
+    const ordre = req.query.ordre as string;        // asc ou desc : ?ordre=asc
+    const triMulti = req.query.triMulti as string; // tri multi-colonnes : ?triMulti=nom:asc,annee:desc
+
+    const promos = await promoService.getAllPromosTrieses(champ, ordre, triMulti);
+
+    res.status(200).json({
+      statut: 'success',
+      message: 'Liste des promos triée avec succès',
+      data: promos,
+    });
+  } catch (error: any) {
+    console.error('Erreur lors du tri des promos:', error);
+    res.status(500).json({
+      statut: 'error',
+      message: 'Erreur lors du tri des promos',
+      data: null,
+    });
+  }
+};
+
 // GET all promos
 export const getAllPromos = async (req: Request, res: Response) => {
   try {

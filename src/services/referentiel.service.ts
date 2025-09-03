@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { ReferentielRepository, CompetenceRepository } from '../repositories';
+import { trieService } from './trie.service';
 
 const prisma = new PrismaClient();
 const referentielRepository = new ReferentielRepository(prisma);
@@ -8,6 +9,25 @@ const competenceRepository = new CompetenceRepository(prisma);
 export class ReferentielService {
   async getAllReferentiels() {
     return await referentielRepository.findAllWithRelations();
+  }
+  async getAllReferentielsTrieses(
+    champTri?: string,
+    ordre?: string,
+    parametreMulti?: string
+  ) {
+    let ordrePrisma;
+
+    if (parametreMulti) {
+      // Tri multi-colonnes
+      ordrePrisma = trieService.triMultiColonnes(['nom', 'id', 'createdAt'], parametreMulti);
+    } else {
+      // Tri simple
+      const champValide = trieService.validerChampTri(['nom', 'id', 'createdAt'], champTri);
+      const ordreValide = trieService.validerOrdre(ordre);
+      ordrePrisma = [{ [champValide]: ordreValide }];
+    }
+
+    return await referentielRepository.findAllWithRelationsTriees(ordrePrisma);
   }
 
   async getReferentielById(id: number) {

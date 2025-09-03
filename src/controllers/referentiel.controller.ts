@@ -25,6 +25,31 @@ export const getAllReferentiels = async (req: Request, res: Response) => {
   }
 };
 
+
+export const getAllReferentielsTrieses = async (req: Request, res: Response) => {
+  try {
+    // Récupération des paramètres de tri depuis l'URL
+    const champ = req.query.champ as string;           // tri simple : ?champ=nom
+    const ordre = req.query.ordre as string;           // asc ou desc : ?ordre=asc
+    const triMulti = req.query.triMulti as string;    // tri multi-colonnes : ?triMulti=nom:asc,createdAt:desc
+
+    const referentiels = await referentielService.getAllReferentielsTrieses(champ, ordre, triMulti);
+
+    res.status(200).json({
+      statut: 'success',
+      message: 'Liste des référentiels triée avec succès',
+      data: referentiels
+    });
+  } catch (error: any) {
+    console.error('Erreur lors du tri des référentiels:', error);
+    res.status(500).json({
+      statut: 'error',
+      message: 'Erreur lors du tri des référentiels',
+      data: null
+    });
+  }
+};
+
 // GET /referentiels/:id - Récupérer un référentiel par ID
 export const getReferentielById = async (req: Request, res: Response) => {
   try {

@@ -6,6 +6,31 @@ import { handleValidationError } from '../utils/validation.utils';
 
 const tagService = new TagService();
 
+/** Liste tous les tags avec tri dynamique */
+export const getAllTagsTrieses = async (req: Request, res: Response) => {
+  try {
+    const champ = req.query.champ as string;        // ex: ?champ=nom
+    const ordre = req.query.ordre as string;        // ex: ?ordre=asc
+    const triMulti = req.query.triMulti as string;  // ex: ?triMulti=nom:asc,id:desc
+
+    const tags = await tagService.getAllTagsTrieses(champ, ordre, triMulti);
+
+    res.status(200).json({
+      statut: "success",
+      message: "Liste des tags triée avec succès",
+      data: tags,
+    });
+  } catch (error) {
+    console.error("Erreur lors du tri des tags:", error);
+    res.status(500).json({
+      statut: "error",
+      message: "Erreur lors du tri des tags",
+      data: null,
+    });
+  }
+};
+
+
 export const getAllTags = async (req: Request, res: Response) => {
   try {
     const tags = await tagService.getAllTags();

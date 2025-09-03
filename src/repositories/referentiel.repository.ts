@@ -16,6 +16,20 @@ export class ReferentielRepository extends BaseRepository implements IBaseReposi
   async findAll(): Promise<Referentiel[]> {
     return await this.prisma.referentiel.findMany();
   }
+   /**
+ * Liste des référentiels avec relations et tri dynamique
+ * @param orderBy - tableau d'objets Prisma { champ: 'asc'|'desc' }
+ */
+async findAllWithRelationsTriees(orderBy: Record<string, 'asc' | 'desc'>[]): Promise<Referentiel[]> {
+  return await this.prisma.referentiel.findMany({
+    include: {
+      competences: true,
+      users: true,
+      promos: true
+    },
+    orderBy
+  });
+}
 
   async findAllWithRelations(): Promise<Referentiel[]> {
     return await this.prisma.referentiel.findMany({

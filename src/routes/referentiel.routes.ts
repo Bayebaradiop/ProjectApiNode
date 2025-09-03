@@ -5,12 +5,14 @@ import {
   createReferentiel,
   updateReferentiel,
   deleteReferentiel,
-  addCompetenceToReferentiel
+  addCompetenceToReferentiel,
+  getAllReferentielsTrieses
 } from '../controllers/referentiel.controller';
 
 const router = Router();
 
 // GET /referentiels - Récupérer tous les utilisateurs
+router.get('/sorted', getAllReferentielsTrieses);
 router.get('/', getAllReferentiels);
 
 // GET /users/:id - Récupérer un utilisateur par ID

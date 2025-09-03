@@ -27,6 +27,30 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
 
 
+// export const getAllUsersTrieses = async (req: Request, res: Response) => {
+//   try {
+//     const champ = req.query.champ as string;
+//     const ordre = req.query.ordre as string;
+//     const triMulti = req.query.triMulti as string;
+
+//     const users = await userService.getAllUsersTrieses(champ, ordre, triMulti);
+
+//     res.status(200).json({
+//       statut: 'success',
+//       message: 'Liste des utilisateurs triée avec succès',
+//       data: users,
+//     });
+//   } catch (error: any) {
+//     console.error('Erreur lors du tri des utilisateurs:', error);
+//     res.status(500).json({
+//       statut: 'error',
+//       message: 'Erreur lors du tri des utilisateurs',
+//       data: null,
+//     });
+//   }
+// };
+
+
 
 
 export const getUserById = async (req: Request, res: Response) => {
@@ -99,11 +123,12 @@ export const createUser = async (req: Request, res: Response) => {
     //   referentielId: newUser.referentielId,
     // };
 
-    res.status(201).json({
-      statut: "success",
-      message: "Utilisateur créé avec succès",
-      data: newUser,
-    });
+  res.status(201).json({
+  statut: "success",
+  message: "Utilisateur créé avec succès",
+  data: newUser, // déjà formaté par select
+});
+
   } catch (error: any) {
     console.error('Erreur lors de la création de l\'utilisateur:', error);
 
