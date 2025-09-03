@@ -1,6 +1,8 @@
 import { PrismaClient, Competence } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { IBaseRepository } from '../interfaces';
+import { buildSearchFilter } from "../services/recherche.service";
+
 
 // Types locaux pour les données de création
 interface CompetenceCreateData {
@@ -15,6 +17,27 @@ export class CompetenceRepository extends BaseRepository implements IBaseReposit
 
   async findAll(): Promise<Competence[]> {
     return await this.prisma.competence.findMany({
+      orderBy: {
+        nom: 'asc'
+      }
+    });
+  }
+
+  async findAllWithSearch(q?: string): Promise<Competence[]> {
+    return await this.prisma.competence.findMany({
+      where:buildSearchFilter(q, ["nom", "description"]),
+      include: {
+        niveaux: {
+          include: {
+            niveau: true
+          }
+        },
+        referentiels: {
+          include: {
+            referentiel: true
+          }
+        }
+      },
       orderBy: {
         nom: 'asc'
       }

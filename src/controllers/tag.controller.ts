@@ -8,10 +8,17 @@ const tagService = new TagService();
 
 export const getAllTags = async (req: Request, res: Response) => {
   try {
-    const tags = await tagService.getAllTags();
+    const tags = await tagService.getAllTags(req.query);
+   if (!tags || tags.length === 0) {
+      return res.status(404).json({
+        statut: "erreur",
+        message: "tag non trouvé",
+        data: null,
+      });
+    } 
     res.status(200).json({
       statut: "success",
-      message: "Liste des tags récupérée avec succès",
+      message: "Liste  des tags récupérée avec succès",
       data: tags,
     });
   } catch (error) {

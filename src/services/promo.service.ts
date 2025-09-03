@@ -6,9 +6,9 @@ const prisma = new PrismaClient();
 const promoRepository = new PromoRepository(prisma);
 
 export class PromoService {
-  async getAllPromos() {
-    return await promoRepository.findAllWithRelations();
-  }
+  // async getAllPromos() {
+  //   return await promoRepository.findAllWithRelations();
+  // }
 
   async getPromoById(id: number) {
     return await promoRepository.findByIdWithRelations(id);
@@ -29,6 +29,14 @@ export class PromoService {
 
     // Puis supprimer la promo
     await promoRepository.delete(id);
+  }
+
+  async getAllPromos(query?: any) {
+    const { q } = query || {};
+    if (q) {
+      return await promoRepository.findAllWithSearch(q);
+    }
+    return await promoRepository.findAllWithRelations();
   }
 }
 

@@ -1,6 +1,8 @@
 import { PrismaClient, Referentiel } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { IBaseRepository } from '../interfaces';
+import { buildSearchFilter } from "../services/recherche.service";
+
 
 // Types locaux pour les données de création
 interface ReferentielCreateData {
@@ -15,6 +17,17 @@ export class ReferentielRepository extends BaseRepository implements IBaseReposi
 
   async findAll(): Promise<Referentiel[]> {
     return await this.prisma.referentiel.findMany();
+  }
+
+  async findAllWithSearch(q?: string): Promise<Referentiel[]> {
+    return await this.prisma.referentiel.findMany({
+      where:buildSearchFilter(q, ["nom"]),
+      include: {
+        competences: true,
+        users: true,
+        promos: true
+      }
+    });
   }
 
   async findAllWithRelations(): Promise<Referentiel[]> {

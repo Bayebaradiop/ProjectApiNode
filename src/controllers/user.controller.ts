@@ -8,8 +8,14 @@ const userService = new UserService();
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await userService.getAllUsers();
-
+    const users = await userService.getAllUsers(req.query);
+    if (!users || users.length === 0) {
+      return res.status(404).json({
+        statut: "erreur",
+        message: "utilisateur non trouvé",
+        data: null,
+      });
+    }
     res.status(200).json({
       statut: "success",
       message: "Liste des utilisateurs récupérée avec succès",
@@ -24,9 +30,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
     });
   }
 };
-
-
-
 
 
 export const getUserById = async (req: Request, res: Response) => {

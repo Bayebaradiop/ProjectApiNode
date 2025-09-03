@@ -1,6 +1,7 @@
 import { PrismaClient, Tag } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { IBaseRepository } from '../interfaces';
+import { buildSearchFilter } from "../services/recherche.service";
 
 // Types locaux pour les données de création
 interface TagCreateData {
@@ -12,10 +13,10 @@ export class TagRepository extends BaseRepository implements IBaseRepository<Tag
     super(prisma);
   }
 
-  async findAll(): Promise<Tag[]> {
+  
+async findAll(): Promise<Tag[]> {
     return await this.prisma.tag.findMany();
   }
-
   async findById(id: number): Promise<Tag | null> {
     return await this.prisma.tag.findUnique({
       where: { id }
@@ -50,4 +51,11 @@ export class TagRepository extends BaseRepository implements IBaseRepository<Tag
     });
     return !!tag;
   }
+
+  async findAllWithSearch(q?: string): Promise<Tag[]> {
+    return await this.prisma.tag.findMany({
+      where: buildSearchFilter(q, ["nom"]), //
+        });
+      }
+
 }

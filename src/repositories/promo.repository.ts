@@ -1,6 +1,8 @@
 import { PrismaClient, Promo } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { IBaseRepository } from '../interfaces';
+import { buildSearchFilter } from "../services/recherche.service";
+
 
 // Types locaux pour les données de création
 interface PromoCreateData {
@@ -21,15 +23,16 @@ export class PromoRepository extends BaseRepository implements IBaseRepository<P
 
   async findAllWithRelations(): Promise<any[]> {
     const promos = await this.prisma.promo.findMany({
-      include: { formateurs: true }
+      // include: { formateurs: true }
     });
     // Pour chaque promo, récupérer les référentiels associés via la table de jointure
     const promosWithReferentiels = await Promise.all(promos.map(async promo => {
       const referentiels = await this.prisma.promoReferentiel.findMany({
         where: { promoId: promo.id },
-        include: { referentiel: true }
+        // include: { referentiel: true }
       });
-      return { ...promo, referentiels: referentiels.map(r => r.referentiel) };
+      // return { ...promo, referentiels: referentiels.map(r => r.referentiel) };
+      return { ...promo };
     }));
     return promosWithReferentiels;
   }
@@ -89,4 +92,12 @@ export class PromoRepository extends BaseRepository implements IBaseRepository<P
     });
     return !!promo;
   }
+
+  async findAllWithSearch(q?: string): Promise<Promo[]> {
+    return await this.prisma.promo.findMany({
+      where:buildSearchFilter(q, ["nom"]),
+      // Ajoute ici les relations nécessaires
+    });
+  }
+
 }

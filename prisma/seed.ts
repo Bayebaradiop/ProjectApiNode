@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Début du seeding de la base de données ECSA...');
+  console.log(' Début du seeding de la base de données ECSA...');
 
   try {
     // 1. Profils

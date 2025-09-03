@@ -1,6 +1,8 @@
 import { PrismaClient, Niveau } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { IBaseRepository } from '../interfaces';
+import { buildSearchFilter } from "../services/recherche.service";
+
 
 // Types locaux pour les données de création
 interface NiveauCreateData {
@@ -14,6 +16,27 @@ export class NiveauRepository extends BaseRepository implements IBaseRepository<
 
   async findAll(): Promise<Niveau[]> {
     return await this.prisma.niveau.findMany({
+      orderBy: {
+        nom: 'asc'
+      }
+    });
+  }
+
+  async findAllWithSearch(q?: string): Promise<Niveau[]> {
+    return await this.prisma.niveau.findMany({
+      where:buildSearchFilter(q, ["nom"]),
+      include: {
+        competences: {
+          include: {
+            competence: {
+              select: {
+                id: true,
+                nom: true
+              }
+            }
+          }
+        }
+      },
       orderBy: {
         nom: 'asc'
       }

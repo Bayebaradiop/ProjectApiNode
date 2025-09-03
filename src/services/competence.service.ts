@@ -6,7 +6,11 @@ const prisma = new PrismaClient();
 const competenceRepository = new CompetenceRepository(prisma);
 
 export class CompetenceService {
-  async getAllCompetences() {
+  async getAllCompetences(query?: any) {
+    const { q } = query || {};
+    if (q) {
+      return await competenceRepository.findAllWithSearch(q);
+    }
     return await competenceRepository.findAllWithRelations();
   }
 

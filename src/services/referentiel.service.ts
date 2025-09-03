@@ -6,7 +6,11 @@ const referentielRepository = new ReferentielRepository(prisma);
 const competenceRepository = new CompetenceRepository(prisma);
 
 export class ReferentielService {
-  async getAllReferentiels() {
+  async getAllReferentiels(query?: any) {
+    const { q } = query || {};
+    if (q) {
+      return await referentielRepository.findAllWithSearch(q);
+    }
     return await referentielRepository.findAllWithRelations();
   }
 

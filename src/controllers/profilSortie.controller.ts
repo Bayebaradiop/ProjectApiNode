@@ -7,8 +7,14 @@ const profilSortieService = new ProfilSortieService();
 
 export const getAllProfilSorties = async (req: Request, res: Response) => {
   try {
-    const profilSorties = await profilSortieService.getAllProfilSorties();
-
+    const profilSorties = await profilSortieService.getAllProfilSorties(req.query);
+    if (!profilSorties || profilSorties.length === 0) {
+      return res.status(404).json({
+        statut: "erreur",
+        message: "profilSortie non trouvé",
+        data: null,
+      });
+    }
     res.status(200).json({
       statut: "success",
       message: "Liste des profils de sortie récupérée avec succès",

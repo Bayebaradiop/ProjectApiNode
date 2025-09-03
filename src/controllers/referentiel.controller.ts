@@ -8,15 +8,20 @@ const referentielService = new ReferentielService();
 // GET /referentiels - Liste de tous les référentiels
 export const getAllReferentiels = async (req: Request, res: Response) => {
   try {
-    const referentiels = await referentielService.getAllReferentiels();
-
+    const referentiels = await referentielService.getAllReferentiels(req.query);
+    if (!referentiels || referentiels.length === 0) {
+      return res.status(404).json({
+        statut: "erreur",
+        message: "referentiel non trouvé",
+        data: null,
+      });
+    }
     res.status(200).json({
       statut: "success",
       message: "Liste des référentiels récupérée avec succès",
       data: referentiels,
     });
   } catch (error) {
-    console.error("Erreur lors de la récupération des référentiels:", error);
     res.status(500).json({
       statut: "error",
       message: "Erreur lors de la récupération des référentiels",

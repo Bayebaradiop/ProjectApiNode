@@ -5,9 +5,17 @@ const prisma = new PrismaClient();
 const userRepository = new UserRepository(prisma);
 
 export class UserService {
-  async getAllUsers() {
-    return await userRepository.findAllWithRelations();
+  async getAllUsers(query?: any) {
+  const { q } = query || {};
+
+  if (q) {
+    // Recherche avec filtre
+    return await userRepository.findAllWithSearch(q);
   }
+
+  // Sinon retour normal
+  return await userRepository.findAllWithRelations();
+}
 
   async getUserById(userId: number) {
     return await userRepository.findByIdWithRelations(userId);
@@ -50,4 +58,5 @@ export class UserService {
   async verifyPassword(email: string, password: string) {
     return await userRepository.verifyPassword(email, password);
   }
+
 }

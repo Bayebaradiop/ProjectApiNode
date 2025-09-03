@@ -1,6 +1,8 @@
 import { PrismaClient, ProfilSortie } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { IBaseRepository } from '../interfaces';
+import { buildSearchFilter } from "../services/recherche.service";
+
 
 // Types locaux pour les données de création
 interface ProfilSortieCreateData {
@@ -14,6 +16,13 @@ export class ProfilSortieRepository extends BaseRepository implements IBaseRepos
 
   async findAll(): Promise<ProfilSortie[]> {
     return await this.prisma.profilSortie.findMany();
+  }
+
+  async findAllWithSearch(q?: string): Promise<ProfilSortie[]> {
+    return await this.prisma.profilSortie.findMany({
+      where:buildSearchFilter(q, ["nom"]),
+      include: { users: true }
+    });
   }
 
   async findAllWithRelations(): Promise<ProfilSortie[]> {

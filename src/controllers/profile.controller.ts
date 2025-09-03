@@ -7,8 +7,14 @@ const profileService = new ProfileService();
 
 export const getAllProfiles = async (req: Request, res: Response) => {
   try {
-    const profiles = await profileService.getAllProfiles();
-
+    const profiles = await profileService.getAllProfiles(req.query);
+    if (!profiles || profiles.length === 0) {
+      return res.status(404).json({
+        statut: "erreur",
+        message: "profile non trouvé",
+        data: null,
+      });
+    }
     res.status(200).json({
       statut: "success",
       message: "Liste des profils récupérée avec succès",

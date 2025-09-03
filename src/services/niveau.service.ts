@@ -6,7 +6,11 @@ const prisma = new PrismaClient();
 const niveauRepository = new NiveauRepository(prisma);
 
 export class NiveauService {
-  async getAllNiveaux() {
+  async getAllNiveaux(query?: any) {
+    const { q } = query || {};
+    if (q) {
+      return await niveauRepository.findAllWithSearch(q);
+    }
     return await niveauRepository.findAllWithRelations();
   }
 

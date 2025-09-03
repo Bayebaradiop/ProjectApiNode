@@ -1,3 +1,4 @@
+// import { getAllPromos } from './promo.controller';
 import { Request, Response } from "express";
 import { PromoService } from "../services/promo.service";
 import { createPromoSchema, updatePromoSchema, promoIdSchema } from "../validators/promo.validator";
@@ -6,22 +7,22 @@ import { handleValidationError } from "../utils/validation.utils";
 const promoService = new PromoService();
 
 // GET all promos
-export const getAllPromos = async (req: Request, res: Response) => {
-  try {
-    const promos = await promoService.getAllPromos();
-    res.status(200).json({
-      statut: "success",
-      message: "Liste des promos récupérée avec succès",
-      data: promos,
-    });
-  } catch (error) {
-    res.status(500).json({
-      statut: "error",
-      message: "Erreur lors de la récupération des promos",
-      data: null,
-    });
-  }
-};
+// export const getAllPromos = async (req: Request, res: Response) => {
+//   try {
+//     const promos = await promoService.getAllPromos();
+//     res.status(200).json({
+//       statut: "success",
+//       message: "Liste des promos récupérée avec succès",
+//       data: promos,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       statut: "error",
+//       message: "Erreur lors de la récupération des promos",
+//       data: null,
+//     });
+//   }
+// };
 
 // GET promo by ID
 export const getPromoById = async (req: Request, res: Response) => {
@@ -112,6 +113,31 @@ export const deletePromo = async (req: Request, res: Response) => {
     res.status(200).json({ statut: "success", message: "Promo supprimée avec succès", data: null });
   } catch (error) {
     res.status(500).json({ statut: "error", message: "Erreur lors de la suppression de la promo" });
+  }
+};
+
+export const getAllPromos = async (req: Request, res: Response) => {
+  try {
+    const promos = await promoService.getAllPromos(req.query);
+    if (!promos || promos.length === 0) {
+      return res.status(404).json({
+        statut: "erreur",
+        message: "promo non trouvée",
+        data: null,
+      });
+    }
+    res.status(200).json({
+      statut: "success",
+      message: "Liste des promos récupérée avec succès",
+      data: promos,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des promos:", error);
+    res.status(500).json({
+      statut: "error",
+      message: "Erreur lors de la récupération des promos",
+      data: null,
+    });
   }
 };
 

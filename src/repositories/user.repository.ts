@@ -2,6 +2,7 @@ import { PrismaClient, User } from '@prisma/client';
 import { BaseRepository } from './base.repository';
 import { IBaseRepository } from '../interfaces';
 import bcrypt from 'bcryptjs';
+import { buildSearchFilter } from "../services/recherche.service";
 
 // Types locaux pour les données de création
 interface UserCreateData {
@@ -125,4 +126,18 @@ export class UserRepository extends BaseRepository implements IBaseRepository<Us
     const isValid = await bcrypt.compare(password, user.password);
     return isValid ? user : null;
   }
+
+async findAllWithSearch(q?: string): Promise<User[]> {
+    return await this.prisma.user.findMany({
+      where: buildSearchFilter(q, ["username", "email"]), //
+      include: {
+        profile: true,
+        profilSortie: true,
+        referentiel: true,
+      },
+    });
+  }
+
 }
+
+
